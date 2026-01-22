@@ -21,6 +21,7 @@ const MAPPING = {
   "lock": "lock",
   "globe": "public",
   "gear": "settings",
+  "person": "person",
 } as IconMapping;
 
 /**

@@ -31,22 +31,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Chat",
+          title: "Home",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="permissions"
+        name="therapists"
         options={{
-          title: "Permissions",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="lock" color={color} />,
+          title: "Therapists",
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="web-tools"
+        name="progress"
         options={{
-          title: "Web Tools",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="globe" color={color} />,
+          title: "Progress",
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chevron.right" color={color} />,
         }}
       />
       <Tabs.Screen
