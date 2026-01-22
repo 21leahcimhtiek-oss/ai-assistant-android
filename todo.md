@@ -168,3 +168,23 @@
 - [x] Store biometric preference
 - [x] Add fallback PIN option (handled by OS)
 - [x] Add biometric settings in Settings screen
+
+
+## In-App Review Prompts (New)
+- [x] Install expo-store-review
+- [x] Create review prompt service
+- [x] Track usage milestones (7 days, 5 journal entries, 10 mood entries, 1 therapy session)
+- [x] Show review prompt at appropriate times
+- [x] Respect user's "Don't ask again" preference
+
+## Dark Mode Improvements (New)
+- [x] Enhance contrast for text on dark backgrounds (foreground: #F0F2F5, muted: #B0B8C4)
+- [x] Improve OLED-friendly pure black backgrounds (#000000)
+- [x] Adjust chart colors for dark mode visibility (brighter mood colors)
+- [x] Test all screens in dark mode
+
+## Smart Wellness Reminders (New)
+- [x] Track mood patterns (3 consecutive days below 5/10)
+- [x] Trigger exercise suggestions when mood drops
+- [x] Create smart notification service
+- [x] Add user preference to enable/disable smart reminders

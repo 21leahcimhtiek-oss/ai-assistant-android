@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { reviewPrompt } from './review-prompt';
+import { wellnessReminders } from './wellness-reminders';
 
 export interface MoodEntry {
   id: string;
@@ -57,9 +59,15 @@ class MoodTrackerService {
         timestamp: Date.now(),
       };
 
-      const entries = await this.getAllMoods();
-      entries.push(newEntry);
-      await AsyncStorage.setItem(MOODS_KEY, JSON.stringify(entries));
+       const moods = await this.getAllMoods();
+      moods.push(newEntry);
+      await AsyncStorage.setItem(MOODS_KEY, JSON.stringify(moods));
+
+      // Track for review prompt
+      await reviewPrompt.incrementMoodEntries();
+
+      // Check if wellness reminder needed
+      await wellnessReminders.checkAndNotify();
 
       return newEntry;
     } catch (error) {

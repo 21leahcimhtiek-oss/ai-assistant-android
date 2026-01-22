@@ -12,6 +12,7 @@ import { ScreenContainer } from '@/components/screen-container';
 import { notificationService, type NotificationPreferences } from '@/lib/notifications';
 import { exportService } from '@/lib/export';
 import { biometricAuth, type BiometricCapabilities } from '@/lib/biometric-auth';
+import { wellnessReminders } from '@/lib/wellness-reminders';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_KEY_STORAGE = '@mindspace_openrouter_key';
@@ -35,6 +36,7 @@ export default function SettingsScreen() {
     supportedTypes: [],
     biometricName: 'Biometric',
   });
+  const [wellnessRemindersEnabled, setWellnessRemindersEnabled] = useState(true);
 
   useEffect(() => {
     loadSettings();
@@ -53,6 +55,9 @@ export default function SettingsScreen() {
 
       const enabled = await biometricAuth.isEnabled();
       setBiometricEnabled(enabled);
+
+      const wellnessSettings = await wellnessReminders.getSettings();
+      setWellnessRemindersEnabled(wellnessSettings.enabled);
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -311,7 +316,7 @@ export default function SettingsScreen() {
               />
             </View>
 
-            <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center justify-between mb-4">
               <View className="flex-1">
                 <Text className="text-base font-semibold text-foreground">
                   Crisis Alerts
@@ -323,6 +328,26 @@ export default function SettingsScreen() {
               <Switch
                 value={notifPrefs.crisisAlerts}
                 onValueChange={(value) => updateNotificationPref('crisisAlerts', value)}
+                trackColor={{ false: '#E5E7EB', true: '#6B9BD1' }}
+                disabled={!notifPrefs.enabled}
+              />
+            </View>
+
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-foreground">
+                  Smart Wellness Reminders
+                </Text>
+                <Text className="text-xs text-muted">
+                  Get exercise suggestions when mood is low for 3+ days
+                </Text>
+              </View>
+              <Switch
+                value={wellnessRemindersEnabled}
+                onValueChange={async (value) => {
+                  setWellnessRemindersEnabled(value);
+                  await wellnessReminders.updateSettings({ enabled: value });
+                }}
                 trackColor={{ false: '#E5E7EB', true: '#6B9BD1' }}
                 disabled={!notifPrefs.enabled}
               />

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { reviewPrompt } from './review-prompt';
 
 export interface JournalEntry {
   id: string;
@@ -88,6 +89,9 @@ class JournalService {
       const entries = await this.getAllEntries();
       entries.push(newEntry);
       await AsyncStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
+
+      // Track for review prompt
+      await reviewPrompt.incrementJournalEntries();
 
       return newEntry;
     } catch (error) {
