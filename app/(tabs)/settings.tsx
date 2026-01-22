@@ -11,6 +11,7 @@ import {
 import { ScreenContainer } from '@/components/screen-container';
 import { notificationService, type NotificationPreferences } from '@/lib/notifications';
 import { exportService } from '@/lib/export';
+import { biometricAuth, type BiometricCapabilities } from '@/lib/biometric-auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_KEY_STORAGE = '@mindspace_openrouter_key';
@@ -27,6 +28,13 @@ export default function SettingsScreen() {
     crisisAlerts: true,
   });
   const [hasPermission, setHasPermission] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometricCapabilities, setBiometricCapabilities] = useState<BiometricCapabilities>({
+    isAvailable: false,
+    isEnrolled: false,
+    supportedTypes: [],
+    biometricName: 'Biometric',
+  });
 
   useEffect(() => {
     loadSettings();
@@ -39,6 +47,12 @@ export default function SettingsScreen() {
 
       const prefs = await notificationService.getPreferences();
       setNotifPrefs(prefs);
+
+      const capabilities = await biometricAuth.checkCapabilities();
+      setBiometricCapabilities(capabilities);
+
+      const enabled = await biometricAuth.isEnabled();
+      setBiometricEnabled(enabled);
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -113,6 +127,28 @@ export default function SettingsScreen() {
       await exportService.shareFile(uri);
     } catch (error) {
       Alert.alert('Export Failed', 'Unable to export all data');
+    }
+  };
+
+  const toggleBiometric = async (value: boolean) => {
+    try {
+      if (value) {
+        // Enable biometric
+        const success = await biometricAuth.enable();
+        if (success) {
+          setBiometricEnabled(true);
+          Alert.alert('Success', `${biometricCapabilities.biometricName} authentication enabled`);
+        } else {
+          Alert.alert('Failed', 'Could not enable biometric authentication');
+        }
+      } else {
+        // Disable biometric
+        await biometricAuth.disable();
+        setBiometricEnabled(false);
+        Alert.alert('Disabled', `${biometricCapabilities.biometricName} authentication disabled`);
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to toggle biometric authentication');
     }
   };
 
@@ -334,6 +370,39 @@ export default function SettingsScreen() {
             >
               <Text className="text-background font-semibold">📦 Export All Data</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Security */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-foreground mb-4">Security</Text>
+          
+          <View className="bg-surface rounded-2xl p-5 border border-border">
+            {biometricCapabilities.isAvailable && biometricCapabilities.isEnrolled ? (
+              <>
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1">
+                    <Text className="text-base font-semibold text-foreground">
+                      {biometricCapabilities.biometricName} Lock
+                    </Text>
+                    <Text className="text-xs text-muted">
+                      Require {biometricCapabilities.biometricName} to open the app
+                    </Text>
+                  </View>
+                  <Switch
+                    value={biometricEnabled}
+                    onValueChange={toggleBiometric}
+                    trackColor={{ false: '#E5E7EB', true: '#6B9BD1' }}
+                  />
+                </View>
+              </>
+            ) : (
+              <Text className="text-sm text-muted">
+                {!biometricCapabilities.isAvailable
+                  ? 'Biometric authentication is not available on this device'
+                  : 'No biometric data enrolled. Please set up biometric authentication in your device settings'}
+              </Text>
+            )}
           </View>
         </View>
 

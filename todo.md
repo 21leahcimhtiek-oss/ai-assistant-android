@@ -142,3 +142,29 @@
 - [x] Export progress report as PDF
 - [x] Export buttons in Settings screen
 - [x] Share exported files functionality
+
+
+## Stripe Payment Integration (New)
+- [x] Install Stripe SDK
+- [x] Create subscription service
+- [x] Implement Free/Premium/Pro tier management
+- [x] Add subscription status checking
+- [x] Create paywall screens
+- [ ] Add payment UI in settings
+- [x] Handle subscription lifecycle (upgrade/downgrade/cancel)
+
+## Onboarding Flow (New)
+- [x] Create onboarding screens (4 screens)
+- [x] Add skip/next navigation
+- [x] Implement first-time user detection
+- [x] Add welcome screen
+- [x] Add feature highlights screens
+- [x] Store onboarding completion status
+
+## Biometric Authentication (New)
+- [x] Install expo-local-authentication
+- [x] Implement biometric lock toggle
+- [x] Add Face ID/Fingerprint prompt on app open
+- [x] Store biometric preference
+- [x] Add fallback PIN option (handled by OS)
+- [x] Add biometric settings in Settings screen
