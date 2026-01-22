@@ -133,3 +133,12 @@
 - [x] Real-time booking system
 - [x] Session management with real therapists
 - [ ] Payment integration for sessions (requires Stripe/payment processor setup)
+
+
+## Data Export Feature (New)
+- [x] PDF export service implementation
+- [x] Export mood history as PDF
+- [x] Export journal entries as PDF
+- [x] Export progress report as PDF
+- [x] Export buttons in Settings screen
+- [x] Share exported files functionality

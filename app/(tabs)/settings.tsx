@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { ScreenContainer } from '@/components/screen-container';
 import { notificationService, type NotificationPreferences } from '@/lib/notifications';
+import { exportService } from '@/lib/export';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_KEY_STORAGE = '@mindspace_openrouter_key';
@@ -72,6 +73,46 @@ export default function SettingsScreen() {
       await notificationService.updatePreferences({ [key]: value });
     } catch (error) {
       Alert.alert('Error', 'Failed to update notification preferences');
+    }
+  };
+
+  const exportMoodHistory = async () => {
+    try {
+      Alert.alert('Exporting', 'Generating PDF...');
+      const uri = await exportService.exportMoodHistory();
+      await exportService.shareFile(uri);
+    } catch (error) {
+      Alert.alert('Export Failed', 'Unable to export mood history');
+    }
+  };
+
+  const exportJournalEntries = async () => {
+    try {
+      Alert.alert('Exporting', 'Generating PDF...');
+      const uri = await exportService.exportJournalEntries();
+      await exportService.shareFile(uri);
+    } catch (error) {
+      Alert.alert('Export Failed', 'Unable to export journal entries');
+    }
+  };
+
+  const exportProgressReport = async () => {
+    try {
+      Alert.alert('Exporting', 'Generating PDF...');
+      const uri = await exportService.exportProgressReport();
+      await exportService.shareFile(uri);
+    } catch (error) {
+      Alert.alert('Export Failed', 'Unable to export progress report');
+    }
+  };
+
+  const exportAllData = async () => {
+    try {
+      Alert.alert('Exporting', 'Generating comprehensive PDF report...');
+      const uri = await exportService.exportAllData();
+      await exportService.shareFile(uri);
+    } catch (error) {
+      Alert.alert('Export Failed', 'Unable to export all data');
     }
   };
 
@@ -250,6 +291,49 @@ export default function SettingsScreen() {
                 disabled={!notifPrefs.enabled}
               />
             </View>
+          </View>
+        </View>
+
+        {/* Export Data */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-foreground mb-4">Export Data</Text>
+          
+          <View className="bg-surface rounded-2xl p-5 border border-border">
+            <Text className="text-sm text-muted mb-4">
+              Export your data as PDF to share with your therapist or keep for your records.
+            </Text>
+            
+            <TouchableOpacity
+              className="bg-primary py-3 rounded-xl items-center mb-3"
+              onPress={exportMoodHistory}
+              activeOpacity={0.8}
+            >
+              <Text className="text-background font-semibold">📊 Export Mood History</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              className="bg-primary py-3 rounded-xl items-center mb-3"
+              onPress={exportJournalEntries}
+              activeOpacity={0.8}
+            >
+              <Text className="text-background font-semibold">📝 Export Journal Entries</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              className="bg-primary py-3 rounded-xl items-center mb-3"
+              onPress={exportProgressReport}
+              activeOpacity={0.8}
+            >
+              <Text className="text-background font-semibold">📈 Export Progress Report</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              className="bg-primary py-3 rounded-xl items-center"
+              onPress={exportAllData}
+              activeOpacity={0.8}
+            >
+              <Text className="text-background font-semibold">📦 Export All Data</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
