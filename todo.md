@@ -188,3 +188,34 @@
 - [x] Trigger exercise suggestions when mood drops
 - [x] Create smart notification service
 - [x] Add user preference to enable/disable smart reminders
+
+
+## Community Support Groups (New)
+- [x] Create support group service
+- [x] Anonymous user profiles for groups
+- [x] Group categories (anxiety, depression, PTSD, addiction, grief, relationships)
+- [x] Post creation and commenting
+- [x] AI moderation for safety
+- [x] Report/flag inappropriate content
+- [x] Community guidelines
+- [x] Support group UI screen
+
+## Voice Journaling (New)
+- [x] Install expo-av for audio recording
+- [x] Audio recording component
+- [x] Transcription service integration
+- [x] Save audio files with transcriptions
+- [x] Play/pause audio playback
+- [ ] Add voice recording to journal screen
+- [ ] Display audio entries in journal list
+
+## Medication Tracker (New)
+- [ ] Medication data model
+- [ ] Add/edit/delete medications
+- [ ] Dosage and schedule tracking
+- [ ] Medication reminders/notifications
+- [ ] Side effects logging
+- [ ] Effectiveness ratings
+- [ ] Medication history view
+- [ ] Export medication report for therapist
+- [ ] Medication tracker UI screen

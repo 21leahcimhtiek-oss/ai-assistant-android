@@ -60,7 +60,14 @@ export default function TabLayout() {
         name="exercises"
         options={{
           title: "Tools",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="star" color={color} />,
+          tabBarIcon: ({ color}) => <IconSymbol size={28} name="star" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="community"
+        options={{
+          title: "Community",
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person" color={color} />,
         }}
       />
       
