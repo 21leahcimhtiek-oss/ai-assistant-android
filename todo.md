@@ -96,3 +96,20 @@
 - [ ] Therapist verification and credentialing
 - [ ] Patient-therapist messaging
 - [ ] Session notes and treatment plans
+
+
+## Remaining UI Screens
+- [x] Therapy chat screen
+- [x] Mood tracker screen
+- [ ] Journal screen
+- [ ] Exercises screen
+- [ ] Crisis support screen
+- [ ] Settings screen (update existing)
+- [ ] Home dashboard screen (update existing)
+
+## Real-time Features
+- [ ] Push notifications setup
+- [ ] Therapy session reminders
+- [ ] Mood check-in prompts
+- [ ] Crisis support alerts
+- [ ] Daily wellness notifications
