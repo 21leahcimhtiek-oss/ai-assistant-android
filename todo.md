@@ -206,8 +206,8 @@
 - [x] Transcription service integration
 - [x] Save audio files with transcriptions
 - [x] Play/pause audio playback
-- [ ] Add voice recording to journal screen
-- [ ] Display audio entries in journal list
+- [x] Add voice recording to journal screen
+- [x] Display audio entries in journal list
 
 ## Medication Tracker (New)
 - [ ] Medication data model
