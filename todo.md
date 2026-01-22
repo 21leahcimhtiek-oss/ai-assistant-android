@@ -1,69 +1,82 @@
-# AI Assistant Pro - TODO
+# MindSpace - TODO
 
 ## Branding
-- [x] Generate custom app logo
-- [x] Update app.config.ts with branding
+- [x] Generate MindSpace logo
+- [x] Update app.config.ts with MindSpace branding
+- [x] Update theme colors to calming palette
 
-## Core AI Features
-- [x] OpenRouter API integration
-- [x] Chat message storage with AsyncStorage
-- [x] Multi-model support (model selector)
-- [ ] Code syntax highlighting in messages
-- [ ] Copy code button functionality
-- [ ] Voice input support
+## AI Therapist
+- [x] Configure OpenRouter with CBT-focused system prompts
+- [x] Create therapeutic conversation templates
+- [x] Implement session history storage
+- [x] Add crisis detection in conversations
+- [x] Create suggested conversation starters
 
-## Permission System
-- [x] Permission management screen
-- [x] User-controlled permission toggles
-- [x] File system access permission
-- [x] Camera access permission
-- [x] Microphone access permission
-- [x] Contacts access permission
-- [x] Location access permission
-- [x] Photo library access permission
-- [x] Calendar access permission
-- [x] Permission request dialogs
-- [x] Permission usage tracking
+## Mood Tracking
+- [x] Mood selector component (1-10 scale)
+- [x] Emotion wheel for detailed feelings
+- [x] Mood history storage with AsyncStorage
+- [x] Mood calendar view
+- [x] Mood trend graphs
+- [x] Mood triggers and notes
 
-## Web Scraping & Proxy
-- [x] Web scraping functionality
-- [x] Rotating proxy system
-- [x] Proxy configuration interface
-- [x] Current IP display
-- [x] Scraping history logs
-- [x] Anonymity testing feature
+## Journaling
+- [x] Journal entry list screen
+- [x] Create/edit journal entry
+- [x] Daily prompts library
+- [x] Guided journaling questions
+- [x] Search and filter entries
+- [x] Mood tagging on entries
+- [x] Writing streak tracker
 
-## Deep Web Connectivity
-- [x] Full Tor/Onion network integration
-- [x] .onion site access capability
-- [x] Tor circuit management
-- [x] Deep web connection toggle
-- [x] Connection status indicators (connected to Tor network)
-- [x] Secure SOCKS5 proxy for Tor
-- [x] Onion routing verification
+## CBT Exercises & Tools
+- [x] Exercises library screen
+- [x] Breathing exercise with animation
+- [x] 5-4-3-2-1 grounding technique
+- [x] Thought challenging worksheet
+- [x] Progressive muscle relaxation
+- [x] Gratitude practice
+- [x] Exercise completion tracking
 
-## UI Components
-- [x] Chat screen with message bubbles
-- [x] Multi-line input field
-- [x] Permissions screen with toggles
-- [x] Web Tools screen
-- [x] Settings screen
-- [x] Tab bar navigation (4 tabs)
-- [ ] Code block component with syntax highlighting
-- [ ] Toast notifications
-- [x] Loading indicators
+## Progress & Insights
+- [x] Progress dashboard
+- [x] Mood trend charts
+- [x] Therapy session insights
+- [x] Exercise completion stats
+- [x] Goals and milestones
+- [x] Wellness score calculation
 
-## Settings & Configuration
-- [x] Theme configuration
-- [x] Model selection settings
-- [x] Clear chat history
-- [ ] Export/import settings
-- [x] About section
+## Crisis Support
+- [x] Crisis resources screen
+- [x] Emergency hotline numbers
+- [x] Crisis button (always visible)
+- [x] Safety plan feature
+- [x] Quick grounding exercises
+- [x] Supportive messages
 
-## Testing & Polish
-- [ ] Test all permission flows
-- [ ] Test web scraping with proxies
-- [ ] Test Tor connectivity
-- [ ] Test AI chat functionality
+## UI Screens
+- [ ] Home/Dashboard screen
+- [ ] Therapy chat screen
+- [ ] Mood tracking screen
+- [ ] Journal screen
+- [ ] Exercises library screen
+- [ ] Progress screen
+- [ ] Crisis resources screen
+- [ ] Settings screen
+- [ ] Tab bar navigation (5 tabs)
+
+## Settings & Data
+- [ ] User preferences
+- [ ] Notification reminders
+- [ ] Data export functionality
+- [ ] Privacy controls
+- [ ] Theme customization
+- [ ] Backup and restore
+
+## Polish & Testing
+- [ ] Test all therapeutic flows
+- [ ] Verify crisis support accessibility
+- [ ] Test mood tracking accuracy
+- [ ] Validate data privacy
 - [ ] Add haptic feedback
 - [ ] Optimize performance

@@ -1,147 +1,219 @@
-# AI Assistant Pro - Mobile App Design
+# MindSpace - Mobile App Design
 
 ## Overview
-A powerful AI coding assistant for Android with unrestricted capabilities, user-controlled phone access, web scraping with rotating proxies, and deep web connectivity.
+MindSpace is an AI-assisted mental health and CBT (Cognitive Behavioral Therapy) mobile app that provides accessible, evidence-based therapeutic support. The app combines AI-powered therapy sessions with mood tracking, journaling, CBT exercises, and crisis resources.
 
 ## Design Philosophy
 - **Mobile-first**: Optimized for portrait orientation (9:16) and one-handed usage
 - **iOS HIG compliant**: Feels like a native iOS app with mainstream design standards
-- **Privacy-focused**: User explicitly controls all permissions
-- **Dark theme default**: Suitable for coding and technical work
+- **Calming & supportive**: Warm, gentle design that reduces anxiety
+- **Privacy-focused**: All data stored locally on device
+- **Accessible**: Clear typography, high contrast, simple navigation
 
 ## Screen List
 
-### 1. Chat Screen (Home)
+### 1. Home/Dashboard Screen
 **Primary Content:**
-- Full-screen chat interface with AI assistant
-- Message bubbles (user messages on right, AI on left)
-- Code blocks with syntax highlighting
-- Inline action buttons (copy code, execute, etc.)
-- Input field with multi-line support at bottom
-- Model selector in header
+- Daily mood check-in prompt at top
+- Quick access cards for key features
+- Recent journal entries preview
+- Mood trend graph (last 7 days)
+- Motivational quote or affirmation
+- Quick crisis button (always visible)
 
 **Functionality:**
-- Send text messages to AI
-- Receive AI responses with code, explanations
-- Copy code snippets
-- Execute code locally (with permission)
-- Attach files/images to messages
-- Voice input support
+- Tap mood check-in to log current mood
+- Access therapy chat, journal, exercises
+- View mood history and insights
+- Emergency crisis support access
 
-### 2. Permissions Screen
+### 2. Therapy Chat Screen
 **Primary Content:**
-- List of available phone permissions with toggle switches
-- Each permission shows:
-  - Icon representing the feature
-  - Permission name (e.g., "File System Access")
-  - Description of what AI can do with it
-  - Status (Granted/Denied)
-- Warning banner at top explaining security implications
+- Full-screen chat interface with AI therapist
+- Message bubbles with warm, supportive design
+- Therapy session history
+- Suggested conversation starters
+- Session notes and insights
 
 **Functionality:**
-- Toggle individual permissions on/off
-- Request system permissions when needed
-- Revoke granted permissions
-- View permission usage history
+- Chat with AI therapist trained in CBT
+- Receive personalized coping strategies
+- Save important insights
+- Schedule follow-up sessions
+- Export session transcripts
 
-### 3. Web Tools Screen
+### 3. Mood Tracking Screen
 **Primary Content:**
-- Web scraping controls
-- Proxy configuration section showing:
-  - Current proxy status (active/rotating)
-  - Number of proxies in rotation
-  - Current IP address
-- Deep web/Tor connectivity toggle
-- Connection status indicators
-- Scraping history list
+- Current mood selector (visual scale 1-10)
+- Emotion wheel for detailed feelings
+- Mood history calendar view
+- Trend graphs and patterns
+- Mood triggers and notes
 
 **Functionality:**
-- Enable/disable proxy rotation
-- Configure proxy settings
-- Enable Tor connectivity
-- View scraping logs
-- Test current connection anonymity
+- Log mood multiple times per day
+- Add context notes to mood entries
+- Identify patterns and triggers
+- View mood correlations
+- Export mood data
 
-### 4. Settings Screen
+### 4. Journal Screen
 **Primary Content:**
-- AI Model settings (OpenRouter configuration)
-- App preferences (theme, notifications)
-- Security settings
-- Storage management
-- About section
+- List of journal entries (newest first)
+- Daily prompts and guided questions
+- Search and filter entries
+- Mood tags on each entry
+- Writing streak counter
 
 **Functionality:**
-- Select default AI model
-- Configure API settings
-- Clear chat history
-- Export/import settings
-- View app version and info
+- Create new journal entries
+- Use guided prompts or free-write
+- Tag entries with emotions
+- Search past entries
+- Lock journal with biometrics
+
+### 5. Exercises & Tools Screen
+**Primary Content:**
+- Library of CBT exercises organized by category
+- Breathing exercises with animations
+- Thought challenging worksheets
+- Grounding techniques (5-4-3-2-1)
+- Progressive muscle relaxation
+- Gratitude practices
+
+**Functionality:**
+- Browse exercises by need (anxiety, depression, stress)
+- Follow guided exercises
+- Track completed exercises
+- Favorite frequently used tools
+- Set reminders for practice
+
+### 6. Progress Screen
+**Primary Content:**
+- Overall wellness score
+- Mood trends over time
+- Therapy session insights
+- Exercise completion stats
+- Journal writing streak
+- Goals and milestones
+
+**Functionality:**
+- View progress charts
+- Set personal goals
+- Celebrate achievements
+- Export progress reports
+- Share with therapist (optional)
+
+### 7. Crisis Resources Screen
+**Primary Content:**
+- Emergency hotline numbers
+- Crisis text lines
+- Local emergency services
+- Breathing exercise (quick access)
+- Safety plan checklist
+- Supportive messages
+
+**Functionality:**
+- One-tap call to crisis lines
+- Access safety plan
+- Quick grounding exercises
+- Emergency contacts
+- Location-based resources
+
+### 8. Settings Screen
+**Primary Content:**
+- Profile and preferences
+- Notification settings
+- Data privacy controls
+- Theme customization
+- Backup and export
+- Professional resources
+
+**Functionality:**
+- Customize app experience
+- Manage reminders
+- Export all data
+- Find professional therapists
+- Privacy settings
 
 ## Key User Flows
 
-### Flow 1: First-time Setup
-1. User opens app → Welcome screen with brief intro
-2. User taps "Get Started" → Navigate to Chat screen
-3. AI sends welcome message explaining capabilities
-4. User asks AI to access a phone feature → Permission request dialog appears
-5. User grants/denies → AI responds accordingly
+### Flow 1: Daily Check-in
+1. User opens app → Home screen with mood prompt
+2. User taps "How are you feeling?" → Mood selector appears
+3. User selects mood (1-10 scale) → Emotion wheel appears
+4. User selects specific emotions → Option to add notes
+5. User adds context → Mood logged, returns to home
 
-### Flow 2: Coding Assistance
-1. User types coding question in chat input
-2. User taps send → Message appears in chat
-3. AI processes and responds with code
-4. User taps "Copy" button on code block → Code copied to clipboard
-5. User can ask follow-up questions
+### Flow 2: Therapy Session
+1. User taps "Talk to Therapist" → Chat screen opens
+2. AI greets user warmly → Asks how they're doing
+3. User shares concerns → AI responds with CBT techniques
+4. AI suggests exercises → User can try them immediately
+5. Session ends → Key insights saved automatically
 
-### Flow 3: Web Scraping with Proxy
-1. User navigates to Web Tools tab
-2. User enables "Proxy Rotation" toggle
-3. User returns to Chat tab
-4. User asks AI to scrape a website
-5. AI uses rotating proxies → Returns scraped data
-6. User can view scraping logs in Web Tools tab
+### Flow 3: Using CBT Exercise
+1. User feels anxious → Opens Exercises tab
+2. User selects "Anxiety" category → List of exercises appears
+3. User taps "5-4-3-2-1 Grounding" → Guided exercise starts
+4. User follows prompts → Exercise completes
+5. User rates helpfulness → Exercise logged in progress
 
-### Flow 4: Permission Management
-1. User navigates to Permissions tab
-2. User sees list of all available permissions
-3. User toggles off "Camera Access"
-4. User returns to Chat
-5. User asks AI to take a photo → AI responds that camera permission is denied
-6. User can grant permission from chat or return to Permissions tab
+### Flow 4: Crisis Support
+1. User in crisis → Taps crisis button (always visible)
+2. Crisis screen opens immediately → Shows hotline numbers
+3. User can call with one tap → Or use quick grounding exercise
+4. Access to safety plan → Supportive messages displayed
+5. Option to chat with AI for immediate support
 
 ## Color Choices
 
 **Brand Colors:**
-- Primary: `#00D9FF` (Cyan Blue) - Tech-forward, AI-themed
-- Background (Dark): `#0A0E14` (Deep Dark Blue)
-- Surface (Dark): `#151B24` (Slightly lighter blue-gray)
-- Foreground: `#E6E8EB` (Off-white for text)
-- Muted: `#8B92A0` (Gray for secondary text)
-- Border: `#1E2530` (Subtle borders)
-- Success: `#00FF88` (Bright green for active states)
-- Warning: `#FFB800` (Amber for warnings)
-- Error: `#FF4757` (Red for errors/denied permissions)
+- Primary: `#6B9BD1` (Calming Blue) - Trust, peace, stability
+- Secondary: `#A8D5BA` (Soft Green) - Growth, healing, hope
+- Background (Light): `#F8F9FA` (Off-white)
+- Background (Dark): `#1A1D23` (Soft dark)
+- Surface: `#FFFFFF` (Pure white cards)
+- Foreground: `#2C3E50` (Dark blue-gray for text)
+- Muted: `#7F8C8D` (Gray for secondary text)
+- Border: `#E8EAED` (Subtle borders)
+- Success: `#52C41A` (Positive green)
+- Warning: `#FAAD14` (Gentle amber)
+- Error: `#F5222D` (Alert red)
+- Crisis: `#FF6B6B` (Urgent but not alarming)
 
-**Accent Colors:**
-- Code blocks: `#1A1F2B` background with `#00D9FF` highlights
-- User messages: `#00D9FF` with `#0A0E14` text
-- AI messages: `#151B24` with `#E6E8EB` text
+**Mood Colors:**
+- Great: `#52C41A` (Bright green)
+- Good: `#A8D5BA` (Soft green)
+- Okay: `#FFD93D` (Warm yellow)
+- Low: `#FFA07A` (Soft orange)
+- Bad: `#FF6B6B` (Gentle red)
 
 ## Typography
-- Headers: Bold, 24-28px
-- Body text: Regular, 16px, line-height 1.5
-- Code: Monospace (Courier/Monaco), 14px
+- Headers: Semi-bold, 24-28px
+- Body text: Regular, 16px, line-height 1.6
 - Captions: Regular, 14px
+- Buttons: Semi-bold, 16px
+- Quotes: Italic, 18px
 
 ## Layout Patterns
-- **Chat bubbles**: Max 80% screen width, rounded corners (16px)
-- **Input field**: Fixed at bottom with safe area padding
-- **Tab bar**: 4 tabs (Chat, Permissions, Web Tools, Settings)
-- **Cards**: Used for permission items and settings groups
-- **Lists**: For scraping history and logs
+- **Cards**: Rounded corners (16px), subtle shadows
+- **Mood selector**: Large, tappable emoji/icons
+- **Chat bubbles**: Asymmetric (AI left, user right), max 85% width
+- **Exercise cards**: Image + title + duration
+- **Graphs**: Simple line charts, no clutter
+- **Crisis button**: Fixed position, always accessible
 
 ## Interaction Patterns
-- **Message send**: Scale animation (0.97) + light haptic
-- **Permission toggle**: Medium haptic + immediate visual feedback
-- **Code copy**: Success toast + light haptic
-- **Tab switch**: Smooth transition, no animation needed
+- **Mood logging**: Gentle haptic feedback
+- **Exercise completion**: Celebration animation + haptic
+- **Journal save**: Auto-save with visual confirmation
+- **Crisis button**: Immediate response, no delays
+- **Therapy responses**: Typing indicator for realism
+
+## Therapeutic Approach
+- **CBT-focused**: Thought challenging, behavioral activation
+- **Trauma-informed**: Gentle, non-judgmental language
+- **Evidence-based**: Proven therapeutic techniques
+- **Personalized**: Adapts to user's needs and progress
+- **Supportive**: Warm, empathetic AI responses
