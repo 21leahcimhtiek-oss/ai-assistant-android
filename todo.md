@@ -210,12 +210,12 @@
 - [x] Display audio entries in journal list
 
 ## Medication Tracker (New)
-- [ ] Medication data model
-- [ ] Add/edit/delete medications
-- [ ] Dosage and schedule tracking
-- [ ] Medication reminders/notifications
-- [ ] Side effects logging
-- [ ] Effectiveness ratings
-- [ ] Medication history view
+- [x] Medication data model
+- [x] Add/edit/delete medications
+- [x] Dosage and schedule tracking
+- [x] Medication reminders/notifications
+- [x] Side effects logging
+- [x] Effectiveness ratings
+- [x] Medication history view
 - [ ] Export medication report for therapist
-- [ ] Medication tracker UI screen
+- [x] Medication tracker UI screen

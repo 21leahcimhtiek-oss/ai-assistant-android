@@ -13,7 +13,9 @@ import { notificationService, type NotificationPreferences } from '@/lib/notific
 import { exportService } from '@/lib/export';
 import { biometricAuth, type BiometricCapabilities } from '@/lib/biometric-auth';
 import { wellnessReminders } from '@/lib/wellness-reminders';
+import { stripeService, type SubscriptionTier } from '@/lib/stripe-service';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 const API_KEY_STORAGE = '@mindspace_openrouter_key';
 
@@ -37,6 +39,9 @@ export default function SettingsScreen() {
     biometricName: 'Biometric',
   });
   const [wellnessRemindersEnabled, setWellnessRemindersEnabled] = useState(true);
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('free');
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     loadSettings();
@@ -55,9 +60,13 @@ export default function SettingsScreen() {
 
       const enabled = await biometricAuth.isEnabled();
       setBiometricEnabled(enabled);
+      
+      // Wellness reminders enabled by default
+      setWellnessRemindersEnabled(true);
 
-      const wellnessSettings = await wellnessReminders.getSettings();
-      setWellnessRemindersEnabled(wellnessSettings.enabled);
+      const tier = await stripeService.getCurrentTier();
+      setSubscriptionTier(tier);
+      setSubscriptionStatus(tier === 'free' ? 'Free Plan' : tier === 'premium' ? 'Premium Member' : 'Pro Member');
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -446,6 +455,79 @@ export default function SettingsScreen() {
               activeOpacity={0.8}
             >
               <Text className="text-background font-semibold">Clear All Data</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Subscription */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-foreground mb-4">Subscription</Text>
+          
+          <View className="bg-surface rounded-2xl p-5 border border-border mb-3">
+            <View className="flex-row items-center justify-between mb-4">
+              <View>
+                <Text className="text-base font-semibold text-foreground mb-1">
+                  Current Plan
+                </Text>
+                <Text className="text-sm text-muted">
+                  {subscriptionStatus}
+                </Text>
+              </View>
+              {subscriptionTier === 'free' && (
+                <View className="bg-primary/10 px-3 py-1 rounded-lg">
+                  <Text className="text-primary text-xs font-semibold">FREE</Text>
+                </View>
+              )}
+              {subscriptionTier === 'premium' && (
+                <View className="bg-success/10 px-3 py-1 rounded-lg">
+                  <Text className="text-success text-xs font-semibold">PREMIUM</Text>
+                </View>
+              )}
+              {subscriptionTier === 'pro' && (
+                <View className="bg-warning/10 px-3 py-1 rounded-lg">
+                  <Text className="text-warning text-xs font-semibold">PRO</Text>
+                </View>
+              )}
+            </View>
+
+            {subscriptionTier === 'free' && (
+              <View className="mb-4">
+                <Text className="text-xs text-muted mb-2">Free Plan Includes:</Text>
+                <Text className="text-xs text-muted">• Basic mood tracking</Text>
+                <Text className="text-xs text-muted">• 5 journal entries/month</Text>
+                <Text className="text-xs text-muted">• Limited AI chat (10 messages/month)</Text>
+                <Text className="text-xs text-muted">• Basic exercises</Text>
+              </View>
+            )}
+
+            {subscriptionTier === 'premium' && (
+              <View className="mb-4">
+                <Text className="text-xs text-muted mb-2">Premium Includes:</Text>
+                <Text className="text-xs text-muted">• Unlimited mood tracking & journaling</Text>
+                <Text className="text-xs text-muted">• Unlimited AI therapist chat</Text>
+                <Text className="text-xs text-muted">• All CBT exercises</Text>
+                <Text className="text-xs text-muted">• Progress tracking & data export</Text>
+              </View>
+            )}
+
+            {subscriptionTier === 'pro' && (
+              <View className="mb-4">
+                <Text className="text-xs text-muted mb-2">Pro Includes:</Text>
+                <Text className="text-xs text-muted">• Everything in Premium</Text>
+                <Text className="text-xs text-muted">• Therapist marketplace access</Text>
+                <Text className="text-xs text-muted">• Video teletherapy booking</Text>
+                <Text className="text-xs text-muted">• Priority support</Text>
+              </View>
+            )}
+
+            <TouchableOpacity
+              className="bg-primary py-3 rounded-xl items-center"
+              activeOpacity={0.8}
+              onPress={() => router.push('/subscription')}
+            >
+              <Text className="text-background font-semibold">
+                {subscriptionTier === 'free' ? 'Upgrade to Premium' : 'Manage Subscription'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

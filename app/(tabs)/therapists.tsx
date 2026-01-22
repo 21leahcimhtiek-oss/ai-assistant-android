@@ -20,10 +20,37 @@ export default function TherapistsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | undefined>();
   const [showFilters, setShowFilters] = useState(false);
+  const [bookedSessions, setBookedSessions] = useState<Array<{
+    id: string;
+    therapist: Therapist;
+    sessionTime: Date;
+    meetingLink: string;
+  }>>([]);
 
   useEffect(() => {
     loadTherapists();
   }, []);
+
+  const handleJoinVideoCall = async (meetingLink: string) => {
+    try {
+      Alert.alert(
+        'Join Video Call',
+        `Ready to join your therapy session?\n\nMeeting Link: ${meetingLink}`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Join',
+            onPress: () => {
+              // In a real app, this would open the video call interface
+              console.log('Joining video call:', meetingLink);
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to join video call');
+    }
+  };
 
   const loadTherapists = async () => {
     setLoading(true);
@@ -84,10 +111,26 @@ export default function TherapistsScreen() {
                 confirmation.therapistName
               );
 
+              // Store booked session with video call link
+              if (confirmation.meetingLink) {
+                setBookedSessions(prev => [...prev, {
+                  id: confirmation.bookingId,
+                  therapist,
+                  sessionTime: confirmation.sessionDate,
+                  meetingLink: confirmation.meetingLink || '',
+                }]);
+              }
+
               Alert.alert(
                 'Booking Confirmed',
-                `Your session with ${confirmation.therapistName} is confirmed for ${confirmation.sessionDate.toLocaleDateString()} at ${confirmation.sessionTime}.\n\n${confirmation.meetingLink ? `Meeting Link: ${confirmation.meetingLink}` : 'Location: In-person'}`,
-                [{ text: 'OK' }]
+                `Your session with ${confirmation.therapistName} is confirmed for ${confirmation.sessionDate.toLocaleDateString()} at ${confirmation.sessionTime}.\n\n${confirmation.meetingLink ? 'You can join the video call from your booked sessions below.' : 'Location: In-person'}`,
+                [
+                  { text: 'OK' },
+                  confirmation.meetingLink ? {
+                    text: 'Join Now',
+                    onPress: () => handleJoinVideoCall(confirmation.meetingLink!),
+                  } : undefined,
+                ].filter(Boolean) as any
               );
             } catch (error) {
               Alert.alert('Booking Failed', 'Unable to book session. Please try again.');
