@@ -104,7 +104,7 @@
 - [x] Journal screen
 - [x] Exercises screen
 - [x] Crisis support screen
-- [ ] Settings screen (update existing)
+- [x] Settings screen (update existing)
 - [x] Home dashboard screen (update existing)
 
 - [x] Data visualization with mood trend charts
@@ -115,3 +115,21 @@
 - [ ] Mood check-in prompts
 - [ ] Crisis support alerts
 - [ ] Daily wellness notifications
+
+
+## Push Notifications (New)
+- [x] Push notification service implementation
+- [x] Notification permission requests
+- [x] User notification preferences in settings
+- [x] Daily mood check-in reminders
+- [x] Therapy session reminders
+- [x] Motivational message notifications
+- [x] Crisis alert notifications
+
+## Real Therapist API Integration (New)
+- [x] Research and select therapist API (Psychology Today)
+- [x] API authentication and setup
+- [x] Live therapist availability integration
+- [x] Real-time booking system
+- [x] Session management with real therapists
+- [ ] Payment integration for sessions (requires Stripe/payment processor setup)

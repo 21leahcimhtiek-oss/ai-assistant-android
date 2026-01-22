@@ -7,9 +7,12 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { ScreenContainer } from '@/components/screen-container';
 import { therapistNetwork, type Therapist } from '@/lib/therapist-network';
+import { therapistAPI, type BookingRequest } from '@/lib/therapist-api';
+import { notificationService } from '@/lib/notifications';
 
 export default function TherapistsScreen() {
   const [therapists, setTherapists] = useState<Therapist[]>([]);
@@ -47,6 +50,55 @@ export default function TherapistsScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBookSession = async (therapist: Therapist) => {
+    Alert.prompt(
+      'Book Session',
+      `Book a session with ${therapist.name}?\n\nEnter your preferred date and time (e.g., 2024-01-25 10:00 AM)`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Book',
+          onPress: async (input?: string) => {
+            try {
+              const [dateStr, timeStr] = (input || '').split(' ');
+              const preferredDate = new Date(dateStr);
+              const preferredTime = timeStr || '10:00 AM';
+
+              const bookingRequest: BookingRequest = {
+                therapistId: therapist.id,
+                patientName: 'User',
+                patientEmail: 'user@example.com',
+                patientPhone: '(555) 123-4567',
+                preferredDate,
+                preferredTime,
+                sessionType: therapist.teletherapyAvailable ? 'teletherapy' : 'in-person',
+                notes: '',
+              };
+
+              const confirmation = await therapistAPI.bookSession(bookingRequest);
+              
+              await notificationService.scheduleTherapyReminder(
+                confirmation.sessionDate,
+                confirmation.therapistName
+              );
+
+              Alert.alert(
+                'Booking Confirmed',
+                `Your session with ${confirmation.therapistName} is confirmed for ${confirmation.sessionDate.toLocaleDateString()} at ${confirmation.sessionTime}.\n\n${confirmation.meetingLink ? `Meeting Link: ${confirmation.meetingLink}` : 'Location: In-person'}`,
+                [{ text: 'OK' }]
+              );
+            } catch (error) {
+              Alert.alert('Booking Failed', 'Unable to book session. Please try again.');
+            }
+          },
+        },
+      ],
+      'plain-text',
+      '',
+      'default'
+    );
   };
 
   const specialties = therapistNetwork.getCommonSpecialties();
@@ -116,6 +168,7 @@ export default function TherapistsScreen() {
       <TouchableOpacity
         className="mt-3 bg-primary py-3 rounded-xl items-center"
         activeOpacity={0.8}
+        onPress={() => handleBookSession(item)}
       >
         <Text className="text-background font-semibold">Book Session</Text>
       </TouchableOpacity>
