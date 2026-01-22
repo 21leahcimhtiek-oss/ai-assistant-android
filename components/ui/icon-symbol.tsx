@@ -22,6 +22,10 @@ const MAPPING = {
   "globe": "public",
   "gear": "settings",
   "person": "person",
+  "message": "chat",
+  "heart": "favorite",
+  "book": "menu-book",
+  "star": "star",
 } as IconMapping;
 
 /**

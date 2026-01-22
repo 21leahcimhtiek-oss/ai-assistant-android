@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { ScreenContainer } from '@/components/screen-container';
 import { progressService, type WellnessScore, type ProgressInsight } from '@/lib/progress';
+import { moodTracker } from '@/lib/mood-tracker';
+import { LineChart } from 'react-native-chart-kit';
+import { useColors } from '@/hooks/use-colors';
 
 export default function ProgressScreen() {
+  const colors = useColors();
   const [loading, setLoading] = useState(true);
   const [wellnessScore, setWellnessScore] = useState<WellnessScore | null>(null);
   const [insights, setInsights] = useState<ProgressInsight[]>([]);
+  const [moodData, setMoodData] = useState<number[]>([]);
+  const [moodLabels, setMoodLabels] = useState<string[]>([]);
   const [weeklySummary, setWeeklySummary] = useState({
     moodEntries: 0,
     journalEntries: 0,
@@ -30,6 +36,32 @@ export default function ProgressScreen() {
       setWellnessScore(score);
       setInsights(insightsData);
       setWeeklySummary(summary);
+
+      // Load mood trend data for the past 7 days
+      const allMoods = await moodTracker.getAllMoods();
+      const last7Days = [];
+      const labels = [];
+      const now = Date.now();
+      const dayMs = 24 * 60 * 60 * 1000;
+
+      for (let i = 6; i >= 0; i--) {
+        const dayStart = now - (i * dayMs);
+        const dayEnd = dayStart + dayMs;
+        const dayMoods = allMoods.filter(m => m.timestamp >= dayStart && m.timestamp < dayEnd);
+        
+        if (dayMoods.length > 0) {
+          const avgMood = dayMoods.reduce((sum, m) => sum + m.moodLevel, 0) / dayMoods.length;
+          last7Days.push(avgMood);
+        } else {
+          last7Days.push(5); // Default neutral mood
+        }
+
+        const date = new Date(dayStart);
+        labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+      }
+
+      setMoodData(last7Days);
+      setMoodLabels(labels);
     } catch (error) {
       console.error('Error loading progress:', error);
     } finally {
@@ -144,6 +176,44 @@ export default function ProgressScreen() {
                   <Text className="text-sm font-semibold text-foreground w-8">{wellnessScore.consistency}</Text>
                 </View>
               </View>
+            </View>
+          </View>
+        )}
+
+        {/* Mood Trend Chart */}
+        {moodData.length > 0 && (
+          <View className="bg-surface rounded-2xl p-5 mb-4 border border-border">
+            <Text className="text-lg font-semibold text-foreground mb-4">Mood Trend (7 Days)</Text>
+            <LineChart
+              data={{
+                labels: moodLabels,
+                datasets: [{ data: moodData }],
+              }}
+              width={Dimensions.get('window').width - 72}
+              height={220}
+              chartConfig={{
+                backgroundColor: colors.surface,
+                backgroundGradientFrom: colors.surface,
+                backgroundGradientTo: colors.surface,
+                decimalPlaces: 1,
+                color: (opacity = 1) => colors.primary,
+                labelColor: (opacity = 1) => colors.muted,
+                style: { borderRadius: 16 },
+                propsForDots: {
+                  r: '6',
+                  strokeWidth: '2',
+                  stroke: colors.primary,
+                },
+              }}
+              bezier
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+              }}
+            />
+            <View className="flex-row justify-between mt-2">
+              <Text className="text-xs text-muted">😢 Low</Text>
+              <Text className="text-xs text-muted">😊 High</Text>
             </View>
           </View>
         )}

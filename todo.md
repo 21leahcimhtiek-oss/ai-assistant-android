@@ -101,11 +101,13 @@
 ## Remaining UI Screens
 - [x] Therapy chat screen
 - [x] Mood tracker screen
-- [ ] Journal screen
-- [ ] Exercises screen
-- [ ] Crisis support screen
+- [x] Journal screen
+- [x] Exercises screen
+- [x] Crisis support screen
 - [ ] Settings screen (update existing)
-- [ ] Home dashboard screen (update existing)
+- [x] Home dashboard screen (update existing)
+
+- [x] Data visualization with mood trend charts
 
 ## Real-time Features
 - [ ] Push notifications setup

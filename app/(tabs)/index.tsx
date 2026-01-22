@@ -1,249 +1,221 @@
-import { useState, useEffect, useRef } from 'react';
-import { ScrollView, Text, View, TextInput, TouchableOpacity, ActivityIndicator, Platform, Alert } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
-import { useColors } from '@/hooks/use-colors';
-import { OpenRouterService, ChatMessage, AVAILABLE_MODELS } from '@/lib/openrouter';
-import { chatStorage, ChatConversation } from '@/lib/chat-storage';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { moodTracker } from '@/lib/mood-tracker';
+import { progressService } from '@/lib/progress';
 
-export default function ChatScreen() {
-  const colors = useColors();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id);
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-  const [tempApiKey, setTempApiKey] = useState('');
-  const scrollViewRef = useRef<ScrollView>(null);
-  const [currentConversationId] = useState(`conv_${Date.now()}`);
+export default function HomeScreen() {
+  const router = useRouter();
+  const [todayMood, setTodayMood] = useState<number | null>(null);
+  const [wellnessScore, setWellnessScore] = useState(0);
+  const [streak, setStreak] = useState(0);
 
   useEffect(() => {
-    loadApiKey();
-    loadConversation();
+    loadDashboardData();
   }, []);
 
-  const loadApiKey = async () => {
-    const key = await chatStorage.getApiKey();
-    if (key) {
-      setApiKey(key);
-    } else {
-      setShowApiKeyInput(true);
-    }
-  };
-
-  const loadConversation = async () => {
-    const conversations = await chatStorage.getConversations();
-    if (conversations.length > 0) {
-      const latest = conversations[conversations.length - 1];
-      setMessages(latest.messages);
-    }
-  };
-
-  const saveApiKey = async () => {
-    if (OpenRouterService.validateApiKey(tempApiKey)) {
-      await chatStorage.saveApiKey(tempApiKey);
-      setApiKey(tempApiKey);
-      setShowApiKeyInput(false);
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    } else {
-      Alert.alert('Invalid API Key', 'Please enter a valid OpenRouter API key (starts with sk-or-)');
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!inputText.trim() || !apiKey) return;
-
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-
-    const userMessage: ChatMessage = {
-      role: 'user',
-      content: inputText.trim(),
-    };
-
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInputText('');
-    setIsLoading(true);
-
+  const loadDashboardData = async () => {
     try {
-      const service = new OpenRouterService(apiKey);
-      const response = await service.chat({
-        model: selectedModel,
-        messages: newMessages,
-      });
-
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: response,
-      };
-
-      const updatedMessages = [...newMessages, assistantMessage];
-      setMessages(updatedMessages);
-
-      // Save conversation
-      const conversation: ChatConversation = {
-        id: currentConversationId,
-        title: newMessages[0]?.content.substring(0, 50) || 'New Chat',
-        messages: updatedMessages,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-      await chatStorage.saveConversation(conversation);
-
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // Load today's mood
+      const todayMoods = await moodTracker.getTodaysMoods();
+      if (todayMoods.length > 0) {
+        setTodayMood(todayMoods[todayMoods.length - 1].moodLevel);
       }
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to get response from AI');
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
-    } finally {
-      setIsLoading(false);
+
+      // Load wellness score
+      const summary = await progressService.getWeeklySummary();
+      const totalActivity = summary.moodEntries + summary.journalEntries + summary.exercisesCompleted;
+      setWellnessScore(Math.min(totalActivity * 5, 100)); // Simple score calculation
+      setStreak(summary.moodEntries); // Use mood entries as streak proxy
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
     }
   };
 
-  const clearChat = async () => {
-    setMessages([]);
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
+  const getMoodEmoji = (mood: number | null) => {
+    if (mood === null) return '😊';
+    if (mood >= 9) return '😄';
+    if (mood >= 7) return '🙂';
+    if (mood >= 5) return '😐';
+    if (mood >= 3) return '😔';
+    return '😢';
   };
 
-  if (showApiKeyInput) {
-    return (
-      <ScreenContainer className="p-6 justify-center">
-        <View className="max-w-md self-center w-full gap-4">
-          <Text className="text-3xl font-bold text-foreground text-center">Welcome</Text>
-          <Text className="text-base text-muted text-center">
-            Enter your OpenRouter API key to start using AI Assistant Pro
-          </Text>
-          
-          <View className="bg-surface rounded-2xl p-4 border border-border">
-            <Text className="text-sm text-muted mb-2">OpenRouter API Key</Text>
-            <TextInput
-              className="bg-background text-foreground p-3 rounded-lg border border-border"
-              placeholder="sk-or-..."
-              placeholderTextColor={colors.muted}
-              value={tempApiKey}
-              onChangeText={setTempApiKey}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          <TouchableOpacity
-            onPress={saveApiKey}
-            className="bg-primary px-6 py-4 rounded-full active:opacity-80"
-          >
-            <Text className="text-background font-semibold text-center text-base">Continue</Text>
-          </TouchableOpacity>
-
-          <Text className="text-xs text-muted text-center">
-            Get your API key from openrouter.ai
-          </Text>
-        </View>
-      </ScreenContainer>
-    );
-  }
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
 
   return (
-    <ScreenContainer className="flex-1">
-      {/* Header */}
-      <View className="px-4 py-3 border-b border-border bg-surface">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-lg font-bold text-foreground">AI Assistant</Text>
+    <ScreenContainer className="p-4">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View className="mb-6">
+          <Text className="text-4xl font-bold text-foreground mb-2">
+            {getGreeting()} 👋
+          </Text>
+          <Text className="text-base text-muted">
+            How are you feeling today?
+          </Text>
+        </View>
+
+        {/* Daily Check-in */}
+        <TouchableOpacity
+          className="bg-gradient-to-r from-primary to-primary/80 rounded-3xl p-6 mb-6 shadow-lg"
+          style={{ backgroundColor: '#6B9BD1' }}
+          onPress={() => router.push('/mood')}
+          activeOpacity={0.9}
+        >
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-background/80 text-sm font-semibold mb-1">
+                Daily Check-in
+              </Text>
+              <Text className="text-background text-2xl font-bold mb-2">
+                {todayMood !== null ? `Mood: ${todayMood}/10` : 'Log Your Mood'}
+              </Text>
+              <Text className="text-background/80 text-sm">
+                {todayMood !== null ? 'Update your mood' : 'How are you feeling right now?'}
+              </Text>
+            </View>
+            <Text className="text-6xl">{getMoodEmoji(todayMood)}</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Wellness Overview */}
+        <View className="bg-surface rounded-2xl p-6 mb-6 border border-border">
+          <Text className="text-xl font-bold text-foreground mb-4">Your Wellness</Text>
+          
+          <View className="flex-row justify-between mb-4">
+            <View className="flex-1 items-center">
+              <View className="bg-primary/10 w-20 h-20 rounded-full items-center justify-center mb-2">
+                <Text className="text-3xl font-bold text-primary">{wellnessScore}</Text>
+              </View>
+              <Text className="text-sm text-muted">Score</Text>
+            </View>
+
+            <View className="flex-1 items-center">
+              <View className="bg-success/10 w-20 h-20 rounded-full items-center justify-center mb-2">
+                <Text className="text-3xl font-bold text-success">{streak}</Text>
+              </View>
+              <Text className="text-sm text-muted">Day Streak</Text>
+            </View>
+          </View>
+
           <TouchableOpacity
-            onPress={clearChat}
-            className="px-3 py-1 active:opacity-60"
+            className="bg-primary py-3 rounded-xl items-center"
+            onPress={() => router.push('/progress')}
+            activeOpacity={0.8}
           >
-            <Text className="text-primary text-sm">Clear</Text>
+            <Text className="text-background font-semibold">View Full Progress</Text>
           </TouchableOpacity>
         </View>
-        <Text className="text-xs text-muted mt-1">{AVAILABLE_MODELS.find(m => m.id === selectedModel)?.name}</Text>
-      </View>
 
-      {/* Messages */}
-      <ScrollView
-        ref={scrollViewRef}
-        className="flex-1 px-4"
-        contentContainerStyle={{ paddingVertical: 16 }}
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-      >
-        {messages.length === 0 && (
-          <View className="flex-1 items-center justify-center py-12">
-            <Text className="text-4xl mb-4">🤖</Text>
-            <Text className="text-xl font-bold text-foreground mb-2">AI Assistant Pro</Text>
-            <Text className="text-sm text-muted text-center px-8">
-              Ask me anything about coding, web scraping, or accessing the deep web
-            </Text>
-          </View>
-        )}
-
-        {messages.map((message, index) => (
-          <View
-            key={index}
-            className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
-          >
-            <View
-              className={`max-w-[80%] p-4 rounded-2xl ${
-                message.role === 'user'
-                  ? 'bg-primary'
-                  : 'bg-surface border border-border'
-              }`}
+        {/* Quick Actions */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-foreground mb-4">Quick Actions</Text>
+          
+          <View className="flex-row flex-wrap gap-3">
+            <TouchableOpacity
+              className="flex-1 min-w-[45%] bg-surface rounded-2xl p-5 border border-border"
+              onPress={() => router.push('/chat')}
+              activeOpacity={0.7}
             >
-              <Text
-                className={`text-base leading-relaxed ${
-                  message.role === 'user' ? 'text-background' : 'text-foreground'
-                }`}
-              >
-                {message.content}
+              <Text className="text-3xl mb-2">💬</Text>
+              <Text className="text-base font-semibold text-foreground mb-1">
+                Talk to AI Therapist
+              </Text>
+              <Text className="text-xs text-muted">Get support anytime</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-1 min-w-[45%] bg-surface rounded-2xl p-5 border border-border"
+              onPress={() => router.push('/journal')}
+              activeOpacity={0.7}
+            >
+              <Text className="text-3xl mb-2">📖</Text>
+              <Text className="text-base font-semibold text-foreground mb-1">
+                Journal
+              </Text>
+              <Text className="text-xs text-muted">Reflect on your day</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-1 min-w-[45%] bg-surface rounded-2xl p-5 border border-border"
+              onPress={() => router.push('/exercises')}
+              activeOpacity={0.7}
+            >
+              <Text className="text-3xl mb-2">🧘</Text>
+              <Text className="text-base font-semibold text-foreground mb-1">
+                Exercises
+              </Text>
+              <Text className="text-xs text-muted">CBT tools & techniques</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-1 min-w-[45%] bg-surface rounded-2xl p-5 border border-border"
+              onPress={() => router.push('/therapists')}
+              activeOpacity={0.7}
+            >
+              <Text className="text-3xl mb-2">👨‍⚕️</Text>
+              <Text className="text-base font-semibold text-foreground mb-1">
+                Find Therapist
+              </Text>
+              <Text className="text-xs text-muted">Connect with professionals</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Crisis Support Banner */}
+        <TouchableOpacity
+          className="bg-error/10 rounded-2xl p-5 mb-6 border-2 border-error/30"
+          onPress={() => router.push('/crisis')}
+          activeOpacity={0.8}
+        >
+          <View className="flex-row items-center">
+            <Text className="text-3xl mr-4">🆘</Text>
+            <View className="flex-1">
+              <Text className="text-lg font-bold text-error mb-1">
+                Need Immediate Help?
+              </Text>
+              <Text className="text-sm text-foreground">
+                Access crisis resources and support 24/7
               </Text>
             </View>
           </View>
-        ))}
+        </TouchableOpacity>
 
-        {isLoading && (
-          <View className="items-start mb-4">
-            <View className="bg-surface border border-border p-4 rounded-2xl">
-              <ActivityIndicator color={colors.primary} />
+        {/* Settings Link */}
+        <TouchableOpacity
+          className="bg-surface rounded-2xl p-5 mb-6 border border-border"
+          onPress={() => router.push('/settings')}
+          activeOpacity={0.7}
+        >
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center">
+              <Text className="text-2xl mr-3">⚙️</Text>
+              <Text className="text-base font-semibold text-foreground">Settings</Text>
             </View>
+            <Text className="text-muted">→</Text>
           </View>
-        )}
-      </ScrollView>
+        </TouchableOpacity>
 
-      {/* Input */}
-      <View className="px-4 py-3 border-t border-border bg-surface">
-        <View className="flex-row items-end gap-2">
-          <View className="flex-1 bg-background rounded-2xl border border-border px-4 py-2">
-            <TextInput
-              className="text-foreground text-base max-h-24"
-              placeholder="Ask me anything..."
-              placeholderTextColor={colors.muted}
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
-              returnKeyType="done"
-              onSubmitEditing={sendMessage}
-              editable={!isLoading}
-            />
-          </View>
-          <TouchableOpacity
-            onPress={sendMessage}
-            disabled={!inputText.trim() || isLoading}
-            className="bg-primary w-12 h-12 rounded-full items-center justify-center active:opacity-80"
-            style={{ opacity: !inputText.trim() || isLoading ? 0.5 : 1 }}
-          >
-            <IconSymbol name="paperplane.fill" size={20} color={colors.background} />
-          </TouchableOpacity>
+        {/* Motivational Quote */}
+        <View className="bg-primary/5 rounded-2xl p-6 mb-6">
+          <Text className="text-base text-foreground italic text-center leading-relaxed">
+            "You don't have to be positive all the time. It's perfectly okay to feel sad, angry, annoyed, frustrated, scared, and anxious. Having feelings doesn't make you a negative person. It makes you human."
+          </Text>
+          <Text className="text-sm text-muted text-center mt-3">— Lori Deschene</Text>
         </View>
-      </View>
+      </ScrollView>
     </ScreenContainer>
   );
 }
