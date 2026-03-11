@@ -112,7 +112,7 @@ export class TorService {
 
   private addLog(type: TorLog['type'], message: string): void {
     const rawSuffix = Math.random().toString(36).slice(2);
-    const logIdSuffix = rawSuffix.length >= 9 ? rawSuffix.slice(0, 9) : rawSuffix.padEnd(9, '0');
+    const logIdSuffix = rawSuffix.padEnd(9, '0').slice(0, 9);
     const log: TorLog = {
       id: `${Date.now()}_${logIdSuffix}`,
       timestamp: Date.now(),
