@@ -100,7 +100,7 @@ export class TorService {
 
   private scheduleSaveLogs(): void {
     if (this.saveLogsTimeout) {
-      return;
+      clearTimeout(this.saveLogsTimeout);
     }
 
     this.saveLogsTimeout = setTimeout(() => {
