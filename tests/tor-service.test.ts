@@ -39,5 +39,9 @@ describe('TorService log persistence', () => {
     );
 
     expect(logWrites).toHaveLength(1);
+
+    const savedLogs = JSON.parse(logWrites[0][1]);
+    expect(savedLogs.some((log: { message: string }) => log.message === 'Attempting to connect to Tor network...')).toBe(true);
+    expect(savedLogs.some((log: { message: string }) => log.message === 'New Tor circuit established')).toBe(true);
   });
 });
