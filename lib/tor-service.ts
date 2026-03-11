@@ -36,6 +36,7 @@ export class TorService {
   private static instance: TorService;
   private settings: TorSettings;
   private logs: TorLog[] = [];
+  private saveLogsTimeout: ReturnType<typeof setTimeout> | null = null;
   private connected: boolean = false;
   private currentCircuit: TorCircuitInfo | null = null;
 
@@ -97,6 +98,17 @@ export class TorService {
     }
   }
 
+  private scheduleSaveLogs(): void {
+    if (this.saveLogsTimeout) {
+      return;
+    }
+
+    this.saveLogsTimeout = setTimeout(() => {
+      this.saveLogsTimeout = null;
+      void this.saveLogs();
+    }, 250);
+  }
+
   private addLog(type: TorLog['type'], message: string): void {
     const log: TorLog = {
       id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -105,7 +117,7 @@ export class TorService {
       message,
     };
     this.logs.push(log);
-    this.saveLogs();
+    this.scheduleSaveLogs();
   }
 
   async enable(): Promise<boolean> {
@@ -301,6 +313,10 @@ export class TorService {
 
   async clearLogs(): Promise<void> {
     this.logs = [];
+    if (this.saveLogsTimeout) {
+      clearTimeout(this.saveLogsTimeout);
+      this.saveLogsTimeout = null;
+    }
     await this.saveLogs();
   }
 
