@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOR_SETTINGS_KEY = '@ai_assistant_tor_settings';
 const TOR_LOGS_KEY = '@ai_assistant_tor_logs';
+const LOG_SAVE_DEBOUNCE_MS = 250;
 
 export interface TorSettings {
   enabled: boolean;
@@ -106,12 +107,13 @@ export class TorService {
     this.saveLogsTimeout = setTimeout(() => {
       this.saveLogsTimeout = null;
       void this.saveLogs();
-    }, 250);
+    }, LOG_SAVE_DEBOUNCE_MS);
   }
 
   private addLog(type: TorLog['type'], message: string): void {
+    const randomSuffix = Math.random().toString(36).slice(2).padEnd(9, '0').slice(0, 9);
     const log: TorLog = {
-      id: `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+      id: `${Date.now()}_${randomSuffix}`,
       timestamp: Date.now(),
       type,
       message,
