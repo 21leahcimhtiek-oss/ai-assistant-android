@@ -111,7 +111,7 @@ export class TorService {
 
   private addLog(type: TorLog['type'], message: string): void {
     const log: TorLog = {
-      id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
       timestamp: Date.now(),
       type,
       message,

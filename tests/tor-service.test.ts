@@ -30,6 +30,7 @@ describe('TorService log persistence', () => {
     asyncStorageMock.setItem.mockClear();
 
     await torService.enable();
+    await torService.newCircuit();
 
     await vi.runAllTimersAsync();
 
