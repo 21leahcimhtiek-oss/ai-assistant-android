@@ -90,8 +90,10 @@ describe('MoodTracker stats caching', () => {
     asyncStorageMock.getItem.mockClear();
     asyncStorageMock.getItem.mockResolvedValue(JSON.stringify(updatedMoods));
 
-    await moodTracker.getMoodStats(30);
+    const updatedStats = await moodTracker.getMoodStats(30);
 
     expect(asyncStorageMock.getItem).toHaveBeenCalledTimes(1);
+    expect(updatedStats.totalEntries).toBe(2);
+    expect(updatedStats.averageMood).toBe(5);
   });
 });

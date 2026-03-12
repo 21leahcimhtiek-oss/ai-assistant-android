@@ -61,7 +61,7 @@ class MoodTrackerService {
     this.statsCache = null;
   }
 
-  private getCachedStats(days: number, now: number): MoodStats | null {
+  private getCachedStatsIfValid(days: number, now: number): MoodStats | null {
     const cache = this.statsCache;
     if (!cache) {
       return null;
@@ -155,7 +155,7 @@ class MoodTrackerService {
   async getMoodStats(days: number = 30): Promise<MoodStats> {
     try {
       const now = Date.now();
-      const cachedStats = this.getCachedStats(days, now);
+      const cachedStats = this.getCachedStatsIfValid(days, now);
       if (cachedStats) {
         return cachedStats;
       }
