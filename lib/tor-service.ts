@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOR_SETTINGS_KEY = '@ai_assistant_tor_settings';
 const TOR_LOGS_KEY = '@ai_assistant_tor_logs';
+const LOG_SAVE_DEBOUNCE_MS = 250;
 
 export interface TorSettings {
   enabled: boolean;
@@ -36,6 +37,7 @@ export class TorService {
   private static instance: TorService;
   private settings: TorSettings;
   private logs: TorLog[] = [];
+  private saveLogsTimeout: ReturnType<typeof setTimeout> | null = null;
   private connected: boolean = false;
   private currentCircuit: TorCircuitInfo | null = null;
 
@@ -97,15 +99,28 @@ export class TorService {
     }
   }
 
+  private scheduleSaveLogs(): void {
+    if (this.saveLogsTimeout) {
+      clearTimeout(this.saveLogsTimeout);
+    }
+
+    this.saveLogsTimeout = setTimeout(() => {
+      this.saveLogsTimeout = null;
+      void this.saveLogs();
+    }, LOG_SAVE_DEBOUNCE_MS);
+  }
+
   private addLog(type: TorLog['type'], message: string): void {
+    const rawSuffix = Math.random().toString(36).slice(2);
+    const logIdSuffix = `${rawSuffix}000000000`.slice(0, 9);
     const log: TorLog = {
-      id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `${Date.now()}_${logIdSuffix}`,
       timestamp: Date.now(),
       type,
       message,
     };
     this.logs.push(log);
-    this.saveLogs();
+    this.scheduleSaveLogs();
   }
 
   async enable(): Promise<boolean> {
@@ -301,6 +316,10 @@ export class TorService {
 
   async clearLogs(): Promise<void> {
     this.logs = [];
+    if (this.saveLogsTimeout) {
+      clearTimeout(this.saveLogsTimeout);
+      this.saveLogsTimeout = null;
+    }
     await this.saveLogs();
   }
 
