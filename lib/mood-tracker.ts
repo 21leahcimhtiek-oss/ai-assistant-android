@@ -20,6 +20,12 @@ export interface MoodStats {
   commonTriggers: string[];
 }
 
+type MoodStatsCache = {
+  days: number;
+  updatedAt: number;
+  value: MoodStats;
+};
+
 const MOODS_KEY = '@mindspace_mood_entries';
 const MOOD_STATS_CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -49,10 +55,27 @@ export const COMMON_TRIGGERS = [
 ];
 
 class MoodTrackerService {
-  private statsCache: { days: number; updatedAt: number; value: MoodStats } | null = null;
+  private statsCache: MoodStatsCache | null = null;
 
   private clearStatsCache() {
     this.statsCache = null;
+  }
+
+  private getCachedStats(days: number, now: number): MoodStats | null {
+    const cache = this.statsCache;
+    if (!cache) {
+      return null;
+    }
+
+    if (cache.days !== days) {
+      return null;
+    }
+
+    if (now - cache.updatedAt >= MOOD_STATS_CACHE_TTL_MS) {
+      return null;
+    }
+
+    return cache.value;
   }
 
   /**
@@ -132,8 +155,9 @@ class MoodTrackerService {
   async getMoodStats(days: number = 30): Promise<MoodStats> {
     try {
       const now = Date.now();
-      if (this.statsCache && this.statsCache.days === days && now - this.statsCache.updatedAt < MOOD_STATS_CACHE_TTL_MS) {
-        return this.statsCache.value;
+      const cachedStats = this.getCachedStats(days, now);
+      if (cachedStats) {
+        return cachedStats;
       }
 
       const moods = await this.getRecentMoods(days);
