@@ -39,22 +39,26 @@ export default function ProgressScreen() {
 
       // Load mood trend data for the past 7 days
       const allMoods = await moodTracker.getAllMoods();
-      const last7Days = [];
-      const labels = [];
+      const last7Days: number[] = [];
+      const labels: string[] = [];
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
+      const rangeStart = now - (6 * dayMs);
+      const moodSums = Array.from({ length: 7 }, () => 0);
+      const moodCounts = Array.from({ length: 7 }, () => 0);
 
-      for (let i = 6; i >= 0; i--) {
-        const dayStart = now - (i * dayMs);
-        const dayEnd = dayStart + dayMs;
-        const dayMoods = allMoods.filter(m => m.timestamp >= dayStart && m.timestamp < dayEnd);
-        
-        if (dayMoods.length > 0) {
-          const avgMood = dayMoods.reduce((sum, m) => sum + m.moodLevel, 0) / dayMoods.length;
-          last7Days.push(avgMood);
-        } else {
-          last7Days.push(5); // Default neutral mood
+      allMoods.forEach(mood => {
+        const bucket = Math.floor((mood.timestamp - rangeStart) / dayMs);
+        if (bucket >= 0 && bucket < 7) {
+          moodSums[bucket] += mood.moodLevel;
+          moodCounts[bucket] += 1;
         }
+      });
+
+      for (let i = 0; i < 7; i++) {
+        const dayStart = rangeStart + (i * dayMs);
+        const count = moodCounts[i];
+        last7Days.push(count > 0 ? moodSums[i] / count : 5);
 
         const date = new Date(dayStart);
         labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));

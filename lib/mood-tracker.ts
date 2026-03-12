@@ -21,6 +21,7 @@ export interface MoodStats {
 }
 
 const MOODS_KEY = '@mindspace_mood_entries';
+const MOOD_STATS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 // Emotion wheel categories
 export const EMOTIONS = {
@@ -48,6 +49,12 @@ export const COMMON_TRIGGERS = [
 ];
 
 class MoodTrackerService {
+  private statsCache: { days: number; updatedAt: number; value: MoodStats } | null = null;
+
+  private clearStatsCache() {
+    this.statsCache = null;
+  }
+
   /**
    * Log a new mood entry
    */
@@ -59,9 +66,10 @@ class MoodTrackerService {
         timestamp: Date.now(),
       };
 
-       const moods = await this.getAllMoods();
+      const moods = await this.getAllMoods();
       moods.push(newEntry);
       await AsyncStorage.setItem(MOODS_KEY, JSON.stringify(moods));
+      this.clearStatsCache();
 
       // Track for review prompt
       await reviewPrompt.incrementMoodEntries();
@@ -123,16 +131,23 @@ class MoodTrackerService {
    */
   async getMoodStats(days: number = 30): Promise<MoodStats> {
     try {
+      const now = Date.now();
+      if (this.statsCache && this.statsCache.days === days && now - this.statsCache.updatedAt < MOOD_STATS_CACHE_TTL_MS) {
+        return this.statsCache.value;
+      }
+
       const moods = await this.getRecentMoods(days);
 
       if (moods.length === 0) {
-        return {
+        const emptyStats = {
           averageMood: 0,
           totalEntries: 0,
           moodTrend: 'stable',
           commonEmotions: [],
           commonTriggers: [],
         };
+        this.statsCache = { days, updatedAt: now, value: emptyStats };
+        return emptyStats;
       }
 
       // Calculate average mood
@@ -176,13 +191,15 @@ class MoodTrackerService {
         .slice(0, 5)
         .map(([trigger]) => trigger);
 
-      return {
+      const stats = {
         averageMood,
         totalEntries: moods.length,
         moodTrend,
         commonEmotions,
         commonTriggers,
       };
+      this.statsCache = { days, updatedAt: now, value: stats };
+      return stats;
     } catch (error) {
       console.error('Error calculating mood stats:', error);
       return {
@@ -225,6 +242,7 @@ class MoodTrackerService {
       const moods = await this.getAllMoods();
       const filtered = moods.filter(m => m.id !== id);
       await AsyncStorage.setItem(MOODS_KEY, JSON.stringify(filtered));
+      this.clearStatsCache();
     } catch (error) {
       console.error('Error deleting mood:', error);
       throw error;
@@ -237,6 +255,7 @@ class MoodTrackerService {
   async clearAllMoods(): Promise<void> {
     try {
       await AsyncStorage.removeItem(MOODS_KEY);
+      this.clearStatsCache();
     } catch (error) {
       console.error('Error clearing moods:', error);
       throw error;
