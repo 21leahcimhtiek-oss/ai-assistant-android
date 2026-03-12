@@ -44,10 +44,15 @@ export default function ProgressScreen() {
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
       const rangeStart = now - (6 * dayMs);
+      const rangeEnd = rangeStart + (7 * dayMs);
       const moodSums = Array.from({ length: 7 }, () => 0);
       const moodCounts = Array.from({ length: 7 }, () => 0);
 
       allMoods.forEach(mood => {
+        if (mood.timestamp < rangeStart || mood.timestamp >= rangeEnd) {
+          return;
+        }
+
         const bucket = Math.floor((mood.timestamp - rangeStart) / dayMs);
         if (bucket >= 0 && bucket < 7) {
           moodSums[bucket] += mood.moodLevel;
