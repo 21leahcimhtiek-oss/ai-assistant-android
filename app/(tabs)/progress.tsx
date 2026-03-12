@@ -39,22 +39,33 @@ export default function ProgressScreen() {
 
       // Load mood trend data for the past 7 days
       const allMoods = await moodTracker.getAllMoods();
-      const last7Days = [];
-      const labels = [];
+      const last7Days: number[] = [];
+      const labels: string[] = [];
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
+      const daysToShow = 7;
+      const rangeStart = now - ((daysToShow - 1) * dayMs);
+      const rangeEnd = rangeStart + (daysToShow * dayMs);
+      const moodSums = Array.from({ length: daysToShow }, () => 0);
+      const moodCounts = Array.from({ length: daysToShow }, () => 0);
+      const getBucketIndex = (timestamp: number) => Math.floor((timestamp - rangeStart) / dayMs);
 
-      for (let i = 6; i >= 0; i--) {
-        const dayStart = now - (i * dayMs);
-        const dayEnd = dayStart + dayMs;
-        const dayMoods = allMoods.filter(m => m.timestamp >= dayStart && m.timestamp < dayEnd);
-        
-        if (dayMoods.length > 0) {
-          const avgMood = dayMoods.reduce((sum, m) => sum + m.moodLevel, 0) / dayMoods.length;
-          last7Days.push(avgMood);
-        } else {
-          last7Days.push(5); // Default neutral mood
+      allMoods.forEach(mood => {
+        if (mood.timestamp < rangeStart || mood.timestamp >= rangeEnd) {
+          return;
         }
+
+        const bucket = getBucketIndex(mood.timestamp);
+        if (bucket >= 0 && bucket < daysToShow) {
+          moodSums[bucket] += mood.moodLevel;
+          moodCounts[bucket] += 1;
+        }
+      });
+
+      for (let i = 0; i < daysToShow; i++) {
+        const dayStart = rangeStart + (i * dayMs);
+        const count = moodCounts[i];
+        last7Days.push(count > 0 ? moodSums[i] / count : 5);
 
         const date = new Date(dayStart);
         labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
