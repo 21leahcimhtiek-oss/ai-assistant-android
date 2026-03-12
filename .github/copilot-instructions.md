@@ -275,6 +275,13 @@ STREAM_API_SECRET=...
 - Use Zod for input validation
 - Handle errors gracefully with user-friendly messages
 
+### Naming Conventions
+- Prefer descriptive, domain-specific names over abbreviations (e.g., `therapySession` instead of `ts`)
+- Use verb-based function names that describe the behavior (e.g., `loadTherapySessions`, `saveMoodEntry`)
+- Avoid single-letter names outside of small loop indices; use full words in callbacks (e.g., `entry`, `resource`)
+- Name booleans with `is/has/can/should` prefixes (e.g., `isLoading`, `hasActivePlan`)
+- Keep file names aligned with the primary export (`session-manager.ts` for session helpers)
+
 ### Mobile-Specific Considerations
 - Use `expo-secure-store` for sensitive data
 - Implement proper keyboard handling

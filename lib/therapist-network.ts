@@ -323,26 +323,32 @@ class TherapistNetworkService {
       let therapists = await this.getAllTherapists();
 
       if (filters.specialty) {
-        therapists = therapists.filter(t =>
-          t.specialties.some(s => s.toLowerCase().includes(filters.specialty!.toLowerCase()))
+        therapists = therapists.filter(therapist =>
+          therapist.specialties.some(specialty =>
+            specialty.toLowerCase().includes(filters.specialty!.toLowerCase())
+          )
         );
       }
 
       if (filters.acceptsInsurance !== undefined) {
-        therapists = therapists.filter(t => t.acceptsInsurance === filters.acceptsInsurance);
+        therapists = therapists.filter(
+          therapist => therapist.acceptsInsurance === filters.acceptsInsurance
+        );
       }
 
       if (filters.maxRate) {
-        therapists = therapists.filter(t => t.sessionRate <= filters.maxRate!);
+        therapists = therapists.filter(therapist => therapist.sessionRate <= filters.maxRate!);
       }
 
       if (filters.teletherapyOnly) {
-        therapists = therapists.filter(t => t.teletherapyAvailable);
+        therapists = therapists.filter(therapist => therapist.teletherapyAvailable);
       }
 
       if (filters.language) {
-        therapists = therapists.filter(t =>
-          t.languages.some(l => l.toLowerCase() === filters.language!.toLowerCase())
+        therapists = therapists.filter(therapist =>
+          therapist.languages.some(
+            language => language.toLowerCase() === filters.language!.toLowerCase()
+          )
         );
       }
 
@@ -359,7 +365,7 @@ class TherapistNetworkService {
   async getTherapist(id: string): Promise<Therapist | null> {
     try {
       const therapists = await this.getAllTherapists();
-      return therapists.find(t => t.id === id) || null;
+      return therapists.find(therapist => therapist.id === id) || null;
     } catch (error) {
       console.error('Error loading therapist:', error);
       return null;

@@ -225,16 +225,16 @@ class VoiceJournalService {
   async deleteEntry(entryId: string): Promise<void> {
     try {
       const entries = await this.getAllEntries();
-      const entry = entries.find(e => e.id === entryId);
+      const entryToDelete = entries.find(entry => entry.id === entryId);
       
       // Delete audio file
-      if (entry?.audioUri) {
-        await FileSystem.deleteAsync(entry.audioUri, { idempotent: true });
+      if (entryToDelete?.audioUri) {
+        await FileSystem.deleteAsync(entryToDelete.audioUri, { idempotent: true });
       }
 
       // Remove from storage
-      const filtered = entries.filter(e => e.id !== entryId);
-      await AsyncStorage.setItem(VOICE_ENTRIES_KEY, JSON.stringify(filtered));
+      const remainingEntries = entries.filter(entry => entry.id !== entryId);
+      await AsyncStorage.setItem(VOICE_ENTRIES_KEY, JSON.stringify(remainingEntries));
     } catch (error) {
       console.error('Error deleting voice entry:', error);
       throw error;

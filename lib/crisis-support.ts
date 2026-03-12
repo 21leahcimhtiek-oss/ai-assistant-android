@@ -113,7 +113,7 @@ class CrisisSupportService {
    * Get resources by type
    */
   getResourcesByType(type: CrisisResource['type']): CrisisResource[] {
-    return CRISIS_RESOURCES.filter(r => r.type === type);
+    return CRISIS_RESOURCES.filter(resource => resource.type === type);
   }
 
   /**
@@ -173,7 +173,7 @@ class CrisisSupportService {
   async updateSafetyPlanItem(id: string, updates: Partial<SafetyPlanItem>): Promise<void> {
     try {
       const items = await this.getSafetyPlan();
-      const index = items.findIndex(i => i.id === id);
+      const index = items.findIndex(item => item.id === id);
       if (index >= 0) {
         items[index] = { ...items[index], ...updates };
         await this.saveSafetyPlan(items);
@@ -190,8 +190,8 @@ class CrisisSupportService {
   async deleteSafetyPlanItem(id: string): Promise<void> {
     try {
       const items = await this.getSafetyPlan();
-      const filtered = items.filter(i => i.id !== id);
-      await this.saveSafetyPlan(filtered);
+      const remainingItems = items.filter(item => item.id !== id);
+      await this.saveSafetyPlan(remainingItems);
     } catch (error) {
       console.error('Error deleting safety plan item:', error);
       throw error;
@@ -248,7 +248,9 @@ class CrisisSupportService {
   async getSafetyPlanByCategory(category: SafetyPlanItem['category']): Promise<SafetyPlanItem[]> {
     try {
       const items = await this.getSafetyPlan();
-      return items.filter(i => i.category === category).sort((a, b) => a.order - b.order);
+      return items
+        .filter(item => item.category === category)
+        .sort((a, b) => a.order - b.order);
     } catch (error) {
       console.error('Error loading safety plan by category:', error);
       return [];
