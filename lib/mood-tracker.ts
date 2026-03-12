@@ -61,7 +61,7 @@ class MoodTrackerService {
     this.statsCache = null;
   }
 
-  private getCachedStatsIfValid(days: number, now: number): MoodStats | null {
+  private getCachedStatsIfValid(days: number, currentTimestamp: number): MoodStats | null {
     const cache = this.statsCache;
     if (!cache) {
       return null;
@@ -71,7 +71,7 @@ class MoodTrackerService {
       return null;
     }
 
-    if (now - cache.updatedAt >= MOOD_STATS_CACHE_TTL_MS) {
+    if (currentTimestamp - cache.updatedAt >= MOOD_STATS_CACHE_TTL_MS) {
       return null;
     }
 
