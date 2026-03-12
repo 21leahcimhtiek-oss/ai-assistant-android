@@ -43,24 +43,26 @@ export default function ProgressScreen() {
       const labels: string[] = [];
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
-      const rangeStart = now - (6 * dayMs);
-      const rangeEnd = rangeStart + (7 * dayMs);
-      const moodSums = Array.from({ length: 7 }, () => 0);
-      const moodCounts = Array.from({ length: 7 }, () => 0);
+      const daysToShow = 7;
+      const rangeStart = now - ((daysToShow - 1) * dayMs);
+      const rangeEnd = rangeStart + (daysToShow * dayMs);
+      const moodSums = Array.from({ length: daysToShow }, () => 0);
+      const moodCounts = Array.from({ length: daysToShow }, () => 0);
+      const getBucketIndex = (timestamp: number) => Math.floor((timestamp - rangeStart) / dayMs);
 
       allMoods.forEach(mood => {
         if (mood.timestamp < rangeStart || mood.timestamp >= rangeEnd) {
           return;
         }
 
-        const bucket = Math.floor((mood.timestamp - rangeStart) / dayMs);
-        if (bucket >= 0 && bucket < 7) {
+        const bucket = getBucketIndex(mood.timestamp);
+        if (bucket >= 0 && bucket < daysToShow) {
           moodSums[bucket] += mood.moodLevel;
           moodCounts[bucket] += 1;
         }
       });
 
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < daysToShow; i++) {
         const dayStart = rangeStart + (i * dayMs);
         const count = moodCounts[i];
         last7Days.push(count > 0 ? moodSums[i] / count : 5);
