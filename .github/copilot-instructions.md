@@ -288,6 +288,9 @@ STREAM_API_SECRET=...
 # Run all tests
 pnpm test
 
+# OpenRouter integration tests require OPENROUTER_API_KEY to be set
+# (set it in the environment or skip those tests when unavailable)
+
 # Run specific test file
 pnpm test server/openrouter.test.ts
 
