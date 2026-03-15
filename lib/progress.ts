@@ -280,13 +280,17 @@ class ProgressService {
 
       const moodEntries = await moodTracker.getRecentMoods(7);
       const journalEntries = await journalService.getRecentEntries(100);
-      const weekJournalEntries = journalEntries.filter(e => e.timestamp >= weekAgo);
+      const weekJournalEntries = journalEntries.filter(
+        journalEntry => journalEntry.timestamp >= weekAgo
+      );
 
       const allCompletions = await exerciseService.getCompletions();
-      const weekCompletions = allCompletions.filter(c => c.timestamp >= weekAgo);
+      const weekCompletions = allCompletions.filter(
+        completion => completion.timestamp >= weekAgo
+      );
 
       const allSessions = await therapyStorage.getAllSessions();
-      const weekSessions = allSessions.filter(s => s.startTime >= weekAgo);
+      const weekSessions = allSessions.filter(session => session.startTime >= weekAgo);
 
       return {
         moodEntries: moodEntries.length,

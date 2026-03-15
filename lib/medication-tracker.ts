@@ -113,15 +113,15 @@ class MedicationTrackerService {
   async deleteMedication(medicationId: string): Promise<void> {
     try {
       const medications = await this.getAllMedications();
-      const medication = medications.find(m => m.id === medicationId);
+      const medicationToDelete = medications.find(medicationItem => medicationItem.id === medicationId);
       
-      if (medication) {
+      if (medicationToDelete) {
         // Cancel reminders
-        await this.cancelReminders(medication);
+        await this.cancelReminders(medicationToDelete);
       }
 
-      const filtered = medications.filter(m => m.id !== medicationId);
-      await AsyncStorage.setItem(MEDICATIONS_KEY, JSON.stringify(filtered));
+      const remainingMedications = medications.filter(medicationItem => medicationItem.id !== medicationId);
+      await AsyncStorage.setItem(MEDICATIONS_KEY, JSON.stringify(remainingMedications));
     } catch (error) {
       console.error('Error deleting medication:', error);
       throw error;
@@ -148,7 +148,9 @@ class MedicationTrackerService {
     try {
       const medications = await this.getAllMedications();
       const now = Date.now();
-      return medications.filter(m => !m.endDate || m.endDate > now);
+      return medications.filter(
+        medicationItem => !medicationItem.endDate || medicationItem.endDate > now
+      );
     } catch (error) {
       console.error('Error getting active medications:', error);
       return [];
