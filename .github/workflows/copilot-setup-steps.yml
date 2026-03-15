@@ -1,6 +1,6 @@
-name: "Copilot Setup Steps"
+name: "Copilot Setup Steps - Multi-Market Deployment Agent"
 
-# Auto-run when this file changes, and allow manual testing from Actions tab
+# Automatically run the setup steps when they are changed to allow for easy validation
 on:
   workflow_dispatch:
   push:
@@ -10,48 +10,104 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
+env:
+  # Node.js version for web deployments
+  NODE_VERSION: "20"
+  # Java version for Android builds
+  JAVA_VERSION: "17"
+  # .NET version for Windows/MSIX builds
+  DOTNET_VERSION: "8.0.x"
+  # Python version for API hunter scripts
+  PYTHON_VERSION: "3.11"
+
 jobs:
-  # MUST be named exactly `copilot-setup-steps`
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
   copilot-setup-steps:
     runs-on: ubuntu-latest
+    timeout-minutes: 59
 
+    # Set the permissions to the lowest permissions possible needed for your steps.
     permissions:
       contents: read
+      packages: read
 
     steps:
+      # ===========================================
+      # CHECKOUT CODE
+      # ===========================================
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          lfs: true
 
-      - name: Set up Node.js 20
+      # ===========================================
+      # NODE.JS SETUP (Vercel, Web Apps)
+      # ===========================================
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Install Node.js dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci --prefer-offline --no-audit
+          fi
+          if [ -f "package-lock.json" ]; then
+            echo "Node dependencies cached"
+          fi
+
+      # ===========================================
+      # JAVA/ANDROID SETUP (Google Play, AAB)
+      # ===========================================
+      - name: Set up Java for Android builds
+        uses: actions/setup-java@v4
         with:
-          version: "9.12.0"
-          run_install: false
+          distribution: "temurin"
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "gradle"
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Cache pnpm dependencies
+      - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-
+            ${{ runner.os }}-gradle-
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install Android SDK components
+        uses: android-actions/setup-android@v3
 
-      - name: Install Expo CLI
-        run: pnpm add -g expo-cli eas-cli
+      # ===========================================
+      # .NET SETUP (Microsoft Store, MSIX)
+      # ===========================================
+      - name: Set up .NET for MSIX builds
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          cache: true
 
-      - name: Set up environment secrets
+      - name: Install MSIX tools
+        run: |
+          dotnet tool install --global Microsoft.VisualStudio.Services.Client
+          dotnet tool install --global NuGet.CommandLine
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      # ===========================================
+      # PYTHON SETUP (API Hunter)
+      # ===========================================
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Python dependencies for API Hunter
         run: |
           echo "ADMIN_SECRET=${{ secrets.ADMIN_SECRET }}" >> $GITHUB_ENV
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
