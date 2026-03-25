@@ -29,7 +29,7 @@ Guidance for Copilot coding agents working in this repository.
 - Write TypeScript; prefer functional components and NativeWind classes over inline styles.
 - Navigation uses `expo-router` (`router.push`, `router.replace`, `router.back`).
 - Validate inputs with Zod in tRPC procedures; return friendly errors.
-- Database: edit `drizzle/schema.ts` first, then run `pnpm db:push`, and update `server/db.ts` queries.
+- Database: edit `drizzle/schema.ts` first, then run `corepack pnpm db:push`, and update `server/db.ts` queries.
 - Secrets: use Expo Secure Store on device; never store secrets in AsyncStorage or commit `.env` values.
 - Payments and AI: route through `server/stripe-service.ts` and `server/openrouter-therapist-service.ts`; do not expose keys client-side.
 
