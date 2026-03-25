@@ -1,5 +1,15 @@
 # GitHub Copilot Instructions for AI Assistant Android (MindSpace)
 
+## For Copilot Coding Agent
+
+When you are assigned an issue in this repository:
+1. **Read this entire document first** to understand project context, conventions, and workflows
+2. **Check the linked resources** - design.md, APP_STORE_LISTINGS.md, and other documentation
+3. **Run the setup steps** defined in `.github/workflows/copilot-setup-steps.yml` to prepare your environment
+4. **Follow the development workflow** described below for making changes
+5. **Test thoroughly** before opening a PR - run linting, type checking, and tests
+6. **Request human review** - never merge your own PRs, and provide clear descriptions of your changes
+
 ## Project Overview
 
 **MindSpace** is an AI-assisted mental health and CBT (Cognitive Behavioral Therapy) mobile app that provides accessible, evidence-based therapeutic support. The app combines AI-powered therapy sessions with mood tracking, journaling, CBT exercises, and crisis resources.
@@ -366,6 +376,111 @@ See `APP_STORE_LISTINGS.md` for store descriptions and metadata.
 - Use high contrast colors
 - Implement proper focus management
 
+## Agent Workflow Best Practices
+
+### Issue Assignment & Planning
+- When assigned an issue, start by thoroughly reading the issue description and all comments
+- Review related documentation (design.md, relevant service files, test files)
+- Create a clear plan with specific, actionable steps
+- Ask clarifying questions in the issue if requirements are ambiguous
+- Break down complex tasks into smaller, manageable sub-tasks
+
+### Development Workflow
+1. **Branch naming**: Use descriptive branch names like `copilot/feature-name` or `copilot/fix-issue-number`
+2. **Incremental changes**: Make small, focused commits with clear messages
+3. **Test as you go**: Run tests after each logical unit of work
+4. **Document decisions**: Add comments explaining non-obvious implementation choices
+5. **Security first**: Never commit secrets, validate inputs, use secure patterns
+
+### Pull Request Guidelines
+- **Clear description**: Explain what changes were made and why
+- **Link to issue**: Reference the issue number using "Closes #123" or "Fixes #123"
+- **Testing evidence**: Include output from tests, linting, and type checking
+- **Breaking changes**: Clearly document any breaking changes or migration steps
+- **Screenshots**: For UI changes, include before/after screenshots or videos
+
+### Code Review Expectations
+- Expect human review on all PRs - never approve or merge your own work
+- Address review feedback promptly and respectfully
+- If a reviewer suggests changes, implement them or explain why you disagree
+- Update the PR description if the scope changes during review
+- Rebase or merge main if conflicts arise, don't leave stale PRs
+
+### Quality Standards
+- **Zero tolerance for bugs**: Test edge cases, error paths, and happy paths
+- **Performance matters**: Avoid unnecessary re-renders, optimize database queries
+- **Security critical**: This is a mental health app - treat user data with utmost care
+- **Accessibility required**: All UI changes must be accessible (screen readers, keyboard navigation)
+- **Mobile-first**: Test on actual devices when possible, consider network conditions
+
+### Communication Guidelines
+- Use issue comments to provide status updates
+- Tag specific people with @mentions when you need input
+- Use GitHub's task lists in issue descriptions to track progress
+- If blocked, clearly explain the blocker and what you need to proceed
+- Celebrate wins! Acknowledge helpful review feedback
+
+## Integration Testing
+
+### Before Opening a PR
+```bash
+# Full test suite
+pnpm test
+
+# Lint and format check
+pnpm lint
+pnpm format
+
+# Type checking
+pnpm check
+
+# Build verification
+pnpm build
+```
+
+### Mobile Testing Checklist
+- [ ] Test on iOS simulator (if iOS changes)
+- [ ] Test on Android emulator (if Android changes)
+- [ ] Test with slow network conditions
+- [ ] Test with airplane mode / offline
+- [ ] Test with different screen sizes
+- [ ] Test with accessibility features enabled (VoiceOver, TalkBack)
+
+### Server Testing Checklist
+- [ ] API endpoints return correct status codes
+- [ ] Error handling works for invalid inputs
+- [ ] Database migrations run successfully
+- [ ] Authentication/authorization works correctly
+- [ ] Rate limiting is enforced where needed
+
+## Common Pitfalls to Avoid
+
+1. **Don't skip tests** - Even "simple" changes can break things
+2. **Don't commit node_modules** - Use .gitignore properly
+3. **Don't hardcode secrets** - Use environment variables
+4. **Don't break existing functionality** - Run the full test suite
+5. **Don't ignore TypeScript errors** - Fix them, don't suppress them with @ts-ignore
+6. **Don't push directly to main** - Always use PRs
+7. **Don't leave debug code** - Remove console.logs and debugging statements
+8. **Don't ignore linter warnings** - Fix them or explicitly disable with justification
+
+## Resources & Links
+
+- **Design Reference**: See `design.md` for UI/UX specifications
+- **App Store Listings**: See `APP_STORE_LISTINGS.md` for marketing copy
+- **Stripe Setup**: See `STRIPE_SETUP.md` for payment integration
+- **Integration Guide**: See `INTEGRATION_GUIDE.md` for third-party services
+- **Remaining Features**: See `REMAINING_FEATURES.md` for planned work
+- **GitHub Copilot Best Practices**: https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent
+
+## Emergency Contacts
+
+- **Project Maintainer**: @21leahcimhtiek-oss
+- **Report Security Issues**: Use GitHub Security Advisories (private disclosure)
+- **Ask Questions**: Open a discussion in GitHub Discussions or comment on your assigned issue
+
 ---
 
 **Happy coding!** 🧠 MindSpace - AI-powered mental health support.
+
+*Remember: You're contributing to a mental health app that could help real people. Write code with care, empathy, and attention to detail.*
