@@ -38,7 +38,7 @@ Guidance for Copilot coding agents working in this repository.
 - Keep new tests close to the code under test (e.g., `server/*.test.ts` or `tests/`).
 
 ## Boundaries and Safety
-- Do not modify `.github/agents/` or commit generated secrets/build artifacts.
+- Do not modify `agents/` or commit generated secrets/build artifacts.
 - Keep accessibility in mind (labels, readable contrast) and handle offline/error states gracefully.
 
 ## References
