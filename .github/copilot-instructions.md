@@ -5,7 +5,7 @@ Guidance for Copilot coding agents working in this repository.
 ## Stack Snapshot
 - Client: React Native 0.81 with Expo SDK 54, Expo Router 6, NativeWind (Tailwind classes).
 - Server: Express + tRPC 11, Drizzle ORM (MySQL).
-- Tooling: TypeScript 5.9, esbuild/vite, pnpm (via corepack).
+- Tooling: TypeScript 5.9, esbuild, Vitest, pnpm (via corepack).
 - Integrations: Stripe, OpenRouter, Expo Notifications, Stream Video.
 
 ## Primary Commands
