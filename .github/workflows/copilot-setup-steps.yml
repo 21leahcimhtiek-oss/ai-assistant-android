@@ -48,16 +48,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
           registry-url: "https://registry.npmjs.org"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
 
       - name: Install Node.js dependencies
         run: |
           if [ -f "package.json" ]; then
-            npm ci --prefer-offline --no-audit
-          fi
-          if [ -f "package-lock.json" ]; then
-            echo "Node dependencies cached"
+            pnpm install --frozen-lockfile --prefer-offline
           fi
 
       # ===========================================
