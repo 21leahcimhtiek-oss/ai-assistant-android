@@ -1,4 +1,4 @@
-name: "Copilot Setup Steps - Multi-Market Deployment Agent"
+name: "Copilot Setup Steps"
 
 # Automatically run the setup steps when they are changed to allow for easy validation
 on:
@@ -10,111 +10,30 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
-env:
-  # Node.js version for web deployments
-  NODE_VERSION: "20"
-  # Java version for Android builds
-  JAVA_VERSION: "17"
-  # .NET version for Windows/MSIX builds
-  DOTNET_VERSION: "8.0.x"
-  # Python version for API hunter scripts
-  PYTHON_VERSION: "3.11"
-
 jobs:
   # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
   copilot-setup-steps:
     runs-on: ubuntu-latest
-    timeout-minutes: 59
+    timeout-minutes: 15
 
     # Set the permissions to the lowest permissions possible needed for your steps.
     permissions:
       contents: read
-      packages: read
 
     steps:
-      # ===========================================
-      # CHECKOUT CODE
-      # ===========================================
       - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          lfs: true
-
-      # ===========================================
-      # NODE.JS SETUP (Vercel, Web Apps)
-      # ===========================================
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: "https://registry.npmjs.org"
+        uses: actions/checkout@v4
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 9
 
-      - name: Install Node.js dependencies
-        run: |
-          if [ -f "package.json" ]; then
-            pnpm install --frozen-lockfile --prefer-offline
-          fi
-
-      # ===========================================
-      # JAVA/ANDROID SETUP (Google Play, AAB)
-      # ===========================================
-      - name: Set up Java for Android builds
-        uses: actions/setup-java@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          distribution: "temurin"
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: "gradle"
+          node-version: "20"
+          cache: "pnpm"
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Install Android SDK components
-        uses: android-actions/setup-android@v3
-
-      # ===========================================
-      # .NET SETUP (Microsoft Store, MSIX)
-      # ===========================================
-      - name: Set up .NET for MSIX builds
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-          cache: true
-
-      - name: Install MSIX tools
-        run: |
-          dotnet tool install --global Microsoft.VisualStudio.Services.Client
-          dotnet tool install --global NuGet.CommandLine
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
-      # ===========================================
-      # PYTHON SETUP (API Hunter)
-      # ===========================================
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
-
-      - name: Install Python dependencies for API Hunter
-        run: |
-          echo "ADMIN_SECRET=${{ secrets.ADMIN_SECRET }}" >> $GITHUB_ENV
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
-          echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" >> $GITHUB_ENV
-          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> $GITHUB_ENV
-          echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> $GITHUB_ENV
-          echo "SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" >> $GITHUB_ENV
-          echo "EXPO_TOKEN=${{ secrets.EXPO_TOKEN }}" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
