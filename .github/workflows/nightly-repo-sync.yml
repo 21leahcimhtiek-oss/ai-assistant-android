@@ -1,0 +1,59 @@
+name: Nightly Repo Sync
+
+on:
+  schedule:
+    - cron: "0 5 * * *"  # 5:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: |
+          type -p gh >/dev/null || (sudo apt-get update && sudo apt-get install -y gh)
+
+      - name: Auth with GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh auth setup-git
+          gh auth status
+
+      - name: Clone all repos for github.repository_owner
+        env:
+          GITHUB_OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          mkdir -p all-repos
+          cd all-repos
+          failed=0
+          while read -r repo; do
+            echo "Cloning $repo"
+            if ! gh repo clone "$repo"; then
+              echo "Failed to clone $repo" >&2
+              failed=1
+            fi
+          done < <(gh repo list "$GITHUB_OWNER" --limit 500 --json nameWithOwner --jq '.[].nameWithOwner')
+          if [ "$failed" -ne 0 ]; then
+            echo "One or more repositories failed to clone; aborting backup." >&2
+            exit 1
+          fi
+
+      - name: Create tarball backup
+        run: |
+          cd all-repos
+          tar -czf ../all-repos-$(date +%F).tar.gz .
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-repos-backup-${{ github.run_id }}-${{ github.run_attempt }}
+          path: all-repos-*.tar.gz
+          if-no-files-found: error
+          retention-days: 30
