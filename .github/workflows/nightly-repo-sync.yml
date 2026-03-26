@@ -1,0 +1,48 @@
+name: Nightly Repo Sync
+
+on:
+  schedule:
+    - cron: "0 5 * * *"  # 5:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: |
+          type -p gh >/dev/null || (sudo apt-get update && sudo apt-get install -y gh)
+
+      - name: Auth with GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh auth setup-git
+          gh auth status
+
+      - name: Clone all repos (owner = @me)
+        env:
+          GITHUB_OWNER: ${{ github.repository_owner }}
+        run: |
+          mkdir -p all-repos
+          cd all-repos
+          gh repo list "$GITHUB_OWNER" --limit 500 --json nameWithOwner --jq '.[].nameWithOwner' | while read repo; do
+            echo "Cloning $repo"
+            gh repo clone "$repo"
+          done
+
+      - name: Create tarball backup
+        run: |
+          cd all-repos
+          tar -czf ../all-repos-$(date +%F).tar.gz .
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-repos-backup-${{ github.run_id }}-${{ github.run_attempt }}
+          path: all-repos-*.tar.gz
+          if-no-files-found: error
+          retention-days: 30
