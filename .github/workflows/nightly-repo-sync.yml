@@ -25,7 +25,7 @@ jobs:
           gh auth setup-git
           gh auth status
 
-      - name: Clone all repos (owner = @me)
+      - name: Clone all repos for github.repository_owner
         env:
           GITHUB_OWNER: ${{ github.repository_owner }}
         run: |
