@@ -14,12 +14,14 @@ import { exportService } from '@/lib/export';
 import { biometricAuth, type BiometricCapabilities } from '@/lib/biometric-auth';
 import { wellnessReminders } from '@/lib/wellness-reminders';
 import { stripeService, type SubscriptionTier } from '@/lib/stripe-service';
+import { useThemeContext } from '@/lib/theme-provider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
 const API_KEY_STORAGE = '@mindspace_openrouter_key';
 
 export default function SettingsScreen() {
+  const { colorScheme, setColorScheme } = useThemeContext();
   const [apiKey, setApiKey] = useState('');
   const [notifPrefs, setNotifPrefs] = useState<NotificationPreferences>({
     enabled: true,
@@ -141,6 +143,16 @@ export default function SettingsScreen() {
       await exportService.shareFile(uri);
     } catch (error) {
       Alert.alert('Export Failed', 'Unable to export all data');
+    }
+  };
+
+  const exportMedicationReport = async () => {
+    try {
+      Alert.alert('Exporting', 'Generating medication report...');
+      const uri = await exportService.exportMedicationReport();
+      await exportService.shareFile(uri);
+    } catch (error) {
+      Alert.alert('Export Failed', 'Unable to export medication report');
     }
   };
 
@@ -398,12 +410,41 @@ export default function SettingsScreen() {
             </TouchableOpacity>
             
             <TouchableOpacity
+              className="bg-primary py-3 rounded-xl items-center mb-3"
+              onPress={exportMedicationReport}
+              activeOpacity={0.8}
+            >
+              <Text className="text-background font-semibold">💊 Export Medication Report</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
               className="bg-primary py-3 rounded-xl items-center"
               onPress={exportAllData}
               activeOpacity={0.8}
             >
               <Text className="text-background font-semibold">📦 Export All Data</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Appearance */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-foreground mb-4">Appearance</Text>
+
+          <View className="bg-surface rounded-2xl p-5 border border-border">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-foreground">Dark Mode</Text>
+                <Text className="text-xs text-muted">
+                  {colorScheme === 'dark' ? 'Dark theme enabled' : 'Light theme enabled'}
+                </Text>
+              </View>
+              <Switch
+                value={colorScheme === 'dark'}
+                onValueChange={(value) => setColorScheme(value ? 'dark' : 'light')}
+                trackColor={{ false: '#E5E7EB', true: '#6B9BD1' }}
+              />
+            </View>
           </View>
         </View>
 

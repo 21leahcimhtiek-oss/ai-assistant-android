@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Appearance, View, useColorScheme as useSystemColorScheme } from "react-native";
 import { colorScheme as nativewindColorScheme, vars } from "nativewind";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SchemeColors, type ColorScheme } from "@/constants/theme";
 
@@ -10,6 +11,8 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+const THEME_STORAGE_KEY = "@mindspace_color_scheme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useSystemColorScheme() ?? "light";
@@ -32,11 +35,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setColorScheme = useCallback((scheme: ColorScheme) => {
     setColorSchemeState(scheme);
     applyScheme(scheme);
+    AsyncStorage.setItem(THEME_STORAGE_KEY, scheme).catch(() => {});
   }, [applyScheme]);
 
+  // Load persisted theme on mount
   useEffect(() => {
-    applyScheme(colorScheme);
-  }, [applyScheme, colorScheme]);
+    AsyncStorage.getItem(THEME_STORAGE_KEY).then((stored) => {
+      if (stored === "dark" || stored === "light") {
+        setColorSchemeState(stored);
+        applyScheme(stored);
+      } else {
+        applyScheme(systemScheme);
+      }
+    }).catch(() => {
+      applyScheme(systemScheme);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const themeVariables = useMemo(
     () =>
@@ -61,7 +76,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }),
     [colorScheme, setColorScheme],
   );
-  console.log(value, themeVariables)
 
   return (
     <ThemeContext.Provider value={value}>
