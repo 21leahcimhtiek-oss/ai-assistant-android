@@ -70,7 +70,7 @@
 - [ ] Notification reminders
 - [ ] Data export functionality
 - [ ] Privacy controls
-- [ ] Theme customization
+- [x] Theme customization
 - [ ] Backup and restore
 
 ## Polish & Testing
@@ -150,7 +150,7 @@
 - [x] Implement Free/Premium/Pro tier management
 - [x] Add subscription status checking
 - [x] Create paywall screens
-- [ ] Add payment UI in settings
+- [x] Add payment UI in settings
 - [x] Handle subscription lifecycle (upgrade/downgrade/cancel)
 
 ## Onboarding Flow (New)
@@ -217,5 +217,5 @@
 - [x] Side effects logging
 - [x] Effectiveness ratings
 - [x] Medication history view
-- [ ] Export medication report for therapist
+- [x] Export medication report for therapist
 - [x] Medication tracker UI screen

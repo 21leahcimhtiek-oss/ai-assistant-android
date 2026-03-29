@@ -163,7 +163,7 @@ class MoodTrackerService {
       const moods = await this.getRecentMoods(days);
 
       if (moods.length === 0) {
-        const emptyStats = {
+        const emptyStats: MoodStats = {
           averageMood: 0,
           totalEntries: 0,
           moodTrend: 'stable',

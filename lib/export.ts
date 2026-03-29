@@ -3,6 +3,7 @@ import * as Sharing from 'expo-sharing';
 import { moodTracker, type MoodEntry } from './mood-tracker';
 import { journalService, type JournalEntry } from './journal';
 import { progressService } from './progress';
+import { medicationTracker, type Medication, type MedicationLog, type SideEffect } from './medication-tracker';
 
 /**
  * Export Service
@@ -86,6 +87,25 @@ class ExportService {
   }
 
   /**
+   * Export medication report as PDF for sharing with therapist
+   */
+  async exportMedicationReport(): Promise<string> {
+    try {
+      const medications = await medicationTracker.getAllMedications();
+      const logs = await medicationTracker.getAllLogs();
+      const sideEffects = await medicationTracker.getAllSideEffects();
+
+      const html = this.generateMedicationReportHTML(medications, logs, sideEffects);
+      const { uri } = await Print.printToFileAsync({ html });
+
+      return uri;
+    } catch (error) {
+      console.error('Error exporting medication report:', error);
+      throw new Error('Failed to export medication report');
+    }
+  }
+
+  /**
    * Share exported PDF file
    */
   async shareFile(uri: string): Promise<void> {
@@ -103,6 +123,146 @@ class ExportService {
   }
 
   // ===== HTML GENERATION METHODS =====
+
+  private generateMedicationReportHTML(
+    medications: Medication[],
+    logs: MedicationLog[],
+    sideEffects: SideEffect[]
+  ): string {
+    const activeMeds = medications.filter(m => !m.endDate || m.endDate > Date.now());
+
+    const medicationRows = activeMeds.map(med => {
+      const medLogs = logs.filter(l => l.medicationId === med.id);
+      const takenCount = medLogs.filter(l => l.taken).length;
+      const adherence = medLogs.length > 0
+        ? Math.round((takenCount / medLogs.length) * 100)
+        : 0;
+      const medSideEffects = sideEffects.filter(s => s.medicationId === med.id);
+      const effectivenessLogs = medLogs.filter(l => l.effectiveness !== undefined);
+      const avgEffectiveness = effectivenessLogs.length > 0
+        ? (effectivenessLogs.reduce((sum, l) => sum + (l.effectiveness ?? 0), 0) / effectivenessLogs.length).toFixed(1)
+        : 'N/A';
+
+      const sideEffectList = medSideEffects.length > 0
+        ? medSideEffects.map(e => `${e.effect} (${e.severity})`).join(', ')
+        : 'None reported';
+
+      return `
+        <tr>
+          <td><strong>${med.name}</strong></td>
+          <td>${med.dosage}</td>
+          <td>${med.frequency.replace(/_/g, ' ')}</td>
+          <td>${med.times.join(', ')}</td>
+          <td>${med.purpose || '-'}</td>
+          <td>${med.prescribedBy || '-'}</td>
+          <td style="text-align:center;">${adherence}%</td>
+          <td style="text-align:center;">${avgEffectiveness}</td>
+          <td>${sideEffectList}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>MindSpace - Medication Report</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              padding: 40px;
+              color: #333;
+            }
+            h1 {
+              color: #6B9BD1;
+              border-bottom: 3px solid #6B9BD1;
+              padding-bottom: 10px;
+            }
+            h2 { color: #6B9BD1; margin-top: 30px; }
+            .header { margin-bottom: 30px; }
+            .meta { color: #666; font-size: 14px; }
+            .summary {
+              background-color: #f0f7ff;
+              padding: 20px;
+              border-radius: 8px;
+              margin-bottom: 20px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+              font-size: 13px;
+            }
+            th {
+              background-color: #6B9BD1;
+              color: white;
+              padding: 10px;
+              text-align: left;
+              font-weight: 600;
+            }
+            td {
+              padding: 9px 10px;
+              border-bottom: 1px solid #ddd;
+              vertical-align: top;
+            }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+            .disclaimer {
+              margin-top: 40px;
+              padding: 15px;
+              background-color: #fff8e1;
+              border-left: 4px solid #f59e0b;
+              font-size: 12px;
+              color: #666;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>MindSpace - Medication Report</h1>
+            <p class="meta">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            <p class="meta">For sharing with your healthcare provider</p>
+          </div>
+
+          <div class="summary">
+            <h3>Summary</h3>
+            <p><strong>Total Medications:</strong> ${medications.length}</p>
+            <p><strong>Active Medications:</strong> ${activeMeds.length}</p>
+            <p><strong>Total Doses Logged:</strong> ${logs.length}</p>
+            <p><strong>Side Effects Reported:</strong> ${sideEffects.length}</p>
+          </div>
+
+          <h2>Active Medications</h2>
+          ${activeMeds.length > 0 ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Medication</th>
+                <th>Dosage</th>
+                <th>Frequency</th>
+                <th>Times</th>
+                <th>Purpose</th>
+                <th>Prescribed By</th>
+                <th>Adherence</th>
+                <th>Avg Effectiveness</th>
+                <th>Side Effects</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${medicationRows}
+            </tbody>
+          </table>
+          ` : '<p>No active medications recorded.</p>'}
+
+          <div class="disclaimer">
+            <strong>Disclaimer:</strong> This report is generated from self-reported data in the MindSpace app.
+            It is intended as a supplement to, not a replacement for, professional medical records.
+            Always consult your healthcare provider for medical advice.
+          </div>
+        </body>
+      </html>
+    `;
+  }
 
   private generateMoodHistoryHTML(moods: MoodEntry[]): string {
     const sortedMoods = moods.sort((a, b) => b.timestamp - a.timestamp);
